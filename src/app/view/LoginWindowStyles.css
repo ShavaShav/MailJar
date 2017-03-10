@@ -1,0 +1,13 @@
+:root {
+	-fx-background-color:lightgray ;
+}
+
+#prompt {
+	 -fx-text-fill: rgb(255, 0 0); 
+}
+
+.buttonClass {
+	-fx-background-color:aqua ;
+	-fx-border-color: black ;
+    -fx-border-radius: 5;
+}
