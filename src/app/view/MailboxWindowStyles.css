@@ -1,0 +1,15 @@
+.root { /* styles the root node */
+	-fx-background-color:lightgray ;
+}
+
+#mainWindow {
+	-fx-background-color: whitesmoke;
+}
+
+#vScroll {
+	-fx-background-color: whitesmoke;
+}
+
+#messageLine {
+	-fx-border-color: lightgray;
+}
