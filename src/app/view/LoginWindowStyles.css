@@ -1,9 +1,10 @@
-:root {
+
+.root { /* styles the root node */
 	-fx-background-color:lightgray ;
 }
 
 #prompt {
-	 -fx-text-fill: rgb(255, 0 0); 
+	-fx-text-fill: rgb(255, 0 0); 
 }
 
 .buttonClass {
