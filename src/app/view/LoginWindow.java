@@ -116,8 +116,9 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 		
 		root.getStylesheets().add("app/view/LoginWindowStyles.css");
 		this.setScene(new Scene(root, 500, 400));
+		this.setResizable(false);
 		this.show();
-        }
+}
 
 	// handle login
 	@Override

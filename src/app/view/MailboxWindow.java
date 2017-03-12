@@ -44,15 +44,19 @@ public class MailboxWindow extends Stage implements EventHandler<ActionEvent>{
 	Button composeBtn;
 	VBox mainWindow;
 	ScrollPane vScroll;
-	Message [] thisMessage;
 	
 	private double SPACING = 10, PADDING = 10;
 	private double TOP_HEIGHT = 180;
 	
 	public MailboxWindow(MailboxModel mailbox) throws MessagingException, IOException{
-		
+		// set up mailbox model
 		this.mailbox = mailbox;
-		this.thisMessage = mailbox.messages;
+		try {
+			mailbox.openInbox();
+		} catch (Exception e) {
+			// TODO Display a message if unable to open inbox
+			e.printStackTrace();
+		}
 		
 		//initialize variables
 		root = new AnchorPane();
@@ -104,35 +108,35 @@ public class MailboxWindow extends Stage implements EventHandler<ActionEvent>{
 		AnchorPane.setRightAnchor(vScroll, 10.0);
 		AnchorPane.setLeftAnchor(vScroll, 10.0);
 		
-		
-		
-		for (int i=0; i<thisMessage.length; i++)
+		// display messages
+		for (Message message : mailbox.getMessages())
 		{
-		
-			Address[] sender = thisMessage[i].getFrom();
+			
+			Address[] sender = message.getFrom();
 			String stringSender = sender[0].toString();
 			Text textSender = new Text();
 			textSender.setText(stringSender);
 			
-			String subject = thisMessage[i].getSubject();
+			String subject = message.getSubject();
 			System.out.println(subject);
 			String stringSubject = subject.toString();
 			Text textSubject = new Text();
 			textSubject.setText(stringSubject);
 		
-			Date date = thisMessage[i].getSentDate();
+			Date date = message.getSentDate();
 			SimpleDateFormat format = new SimpleDateFormat("MMM d");
 			String formatDate = format.format(date);
 			Text textDate = new Text();
 			textDate.setText(formatDate);
 			
 			HBox messageLine = new HBox();
+			messageLine.getStyleClass().add("messageLine"); // css #messageLine class
 			messageLine.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			    @Override
 			    public void handle(MouseEvent mouseEvent) {
 			        if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
 			            if(mouseEvent.getClickCount() == 2){
-			            	new MessageWindow();
+			            	new MessageWindow(message);
 			            }
 			        }
 			    }

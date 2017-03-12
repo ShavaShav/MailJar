@@ -13,3 +13,8 @@
 #messageLine {
 	-fx-border-color: lightgray;
 }
+
+#messageLine:hover{
+	-fx-border-color: darkgray;
+	-fx-background-color: lightgray;
+}

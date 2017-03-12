@@ -1,5 +1,7 @@
 package app.view;
 
+import javax.mail.Message;
+
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
@@ -7,9 +9,10 @@ import javafx.stage.Stage;
 public class MessageWindow extends Stage {
 	
 	AnchorPane root;
+	Message message;
 	
-	public MessageWindow(){
-		
+	public MessageWindow(Message message){
+		this.message = message;
 		root = new AnchorPane();
 		
 		
