@@ -15,6 +15,8 @@ import javax.mail.Store;
 public class MailboxModel {
 	Store store;
 	HashMap<String, String> hostMap;
+	Folder emailFolder;
+	public Message [] messages;
 	
 	public MailboxModel(String email, String password) throws MessagingException, IOException{
 		hostMap = new HashMap<String, String>();
@@ -49,12 +51,12 @@ public class MailboxModel {
 	      
 	      //create the folder object and open it
 	      System.out.println("Opening INBOX:");
-	      Folder emailFolder = store.getFolder("INBOX");
+	      emailFolder = store.getFolder("INBOX");
 	      emailFolder.open(Folder.READ_ONLY);
 	      System.out.println(emailFolder.getUnreadMessageCount() + " unread message(s)");
 
 	      // retrieve the messages from inbox folder in an array and print it
-	      Message[] messages = emailFolder.getMessages();
+	      messages = emailFolder.getMessages();
 	      System.out.println(messages.length + " messages total.");
 
 	      if (messages.length == 0){
