@@ -13,6 +13,7 @@ import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
 
 import app.model.MailboxModel;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -35,8 +36,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
-public class MailboxWindow extends Stage implements EventHandler<ActionEvent>{
+public class MailboxWindow extends Stage {
 	
 	AnchorPane root;
 	MailboxModel mailbox; // model that supplies methods to get info for window
@@ -49,6 +51,7 @@ public class MailboxWindow extends Stage implements EventHandler<ActionEvent>{
 	private double TOP_HEIGHT = 180;
 	
 	public MailboxWindow(MailboxModel mailbox) throws MessagingException, IOException{
+		setTitle("Inbox");
 		// set up mailbox model
 		this.mailbox = mailbox;
 		try {
@@ -83,7 +86,14 @@ public class MailboxWindow extends Stage implements EventHandler<ActionEvent>{
 		MenuItem exit = new MenuItem("Exit");
 		exit.setOnAction(new EventHandler<ActionEvent>() {
 		    public void handle(ActionEvent t) {
-		        System.exit(0);
+				try {
+					mailbox.close();
+				} catch (MessagingException e) {
+					System.out.println("Unable to close store");
+				} finally {
+					Platform.exit();
+					System.exit(0);	// exit regardless				
+				}
 		    }
 		});
 		fileMenu.getItems().add(exit);
@@ -136,7 +146,12 @@ public class MailboxWindow extends Stage implements EventHandler<ActionEvent>{
 			    public void handle(MouseEvent mouseEvent) {
 			        if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
 			            if(mouseEvent.getClickCount() == 2){
-			            	new MessageWindow(message);
+			            	try {
+								new MessageWindow(message);
+							} catch (Exception e) {
+								// TODO Print a message if unable to open!
+								e.printStackTrace();
+							}
 			            }
 			        }
 			    }
@@ -163,15 +178,23 @@ public class MailboxWindow extends Stage implements EventHandler<ActionEvent>{
 		root.getChildren().addAll(menuBar, buttonWindow, vScroll);
 		root.getStylesheets().add("app/view/MailboxWindowStyles.css");
 		
+		// if this window is closed, then whole application will close
+		this.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			public void handle(WindowEvent we) {
+				try {
+					mailbox.close();
+				} catch (MessagingException e) {
+					System.out.println("Unable to close store");
+				} finally {
+					Platform.exit();
+					System.exit(0);	// exit regardless				
+				}
+			  }
+	    });       
+		
 		// set stage and show
 		this.setScene(new Scene(root, 1200, 800));
 		this.show();
-	}
-
-	@Override
-	public void handle(ActionEvent event) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

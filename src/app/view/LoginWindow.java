@@ -37,6 +37,7 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 	private double SPACING = 10, PADDING = 10;
 	
 	public LoginWindow(){
+		setTitle("Sign-in");
 		root = new AnchorPane();
 
 		mainPart = new VBox();
