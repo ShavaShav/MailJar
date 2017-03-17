@@ -9,7 +9,7 @@ import javafx.stage.Stage;
 public class ComposeMailWindow extends Stage{
 	
 	private AnchorPane root;
-	private static final HTMLEditor editor = new HTMLEditor();
+	private static HTMLEditor editor;
 	private static final double TOP_OF_EDITOR = 100.0; // pixels from top of window 
 	private static final double BOTTOM_OF_EDITOR = 50.0; // pixels from bottom of window
 	
@@ -17,6 +17,7 @@ public class ComposeMailWindow extends Stage{
 		setTitle("Compose New Message");
 		root = new AnchorPane();
 		
+		editor = new HTMLEditor();
 		HBox editorBox = new HBox();
 		editorBox.getChildren().add(editor);
 		

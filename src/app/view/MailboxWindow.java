@@ -40,12 +40,13 @@ import javafx.stage.WindowEvent;
 
 public class MailboxWindow extends Stage {
 	
-	AnchorPane root;
-	MailboxModel mailbox; // model that supplies methods to get info for window
-	HBox buttonWindow;
-	Button composeBtn;
-	VBox mainWindow;
-	ScrollPane vScroll;
+	private int maxMessages = 50; 
+	private AnchorPane root;
+	private MailboxModel mailbox; // model that supplies methods to get info for window
+	private HBox buttonWindow;
+	private Button composeBtn;
+	private VBox mainWindow;
+	private ScrollPane vScroll;
 	
 	private double SPACING = 10, PADDING = 10;
 	private double TOP_HEIGHT = 180;
@@ -118,61 +119,9 @@ public class MailboxWindow extends Stage {
 		AnchorPane.setRightAnchor(vScroll, 10.0);
 		AnchorPane.setLeftAnchor(vScroll, 10.0);
 		
-		// display messages
-		for (Message message : mailbox.getMessages())
-		{
-			
-			Address[] sender = message.getFrom();
-			String stringSender = sender[0].toString();
-			Text textSender = new Text();
-			textSender.setText(stringSender);
-			
-			String subject = message.getSubject();
-			System.out.println(subject);
-			String stringSubject = subject.toString();
-			Text textSubject = new Text();
-			textSubject.setText(stringSubject);
-		
-			Date date = message.getSentDate();
-			SimpleDateFormat format = new SimpleDateFormat("MMM d");
-			String formatDate = format.format(date);
-			Text textDate = new Text();
-			textDate.setText(formatDate);
-			
-			HBox messageLine = new HBox();
-			messageLine.getStyleClass().add("messageLine"); // css #messageLine class
-			messageLine.setOnMouseClicked(new EventHandler<MouseEvent>() {
-			    @Override
-			    public void handle(MouseEvent mouseEvent) {
-			        if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
-			            if(mouseEvent.getClickCount() == 2){
-			            	try {
-								new MessageWindow(message);
-							} catch (Exception e) {
-								// TODO Print a message if unable to open!
-								e.printStackTrace();
-							}
-			            }
-			        }
-			    }
-			});
-			messageLine.setId("messageLine");
-			messageLine.setPadding(new Insets(5));
-			messageLine.setPrefWidth(1150);
-			
-			GridPane mgp = new GridPane();
-			mgp.setPrefWidth(1140);
-			mgp.setHgap(50.00);
-			
-			mgp.add(textSender, 0, 0);
-			mgp.add(textSubject, 1, 0);
-			mgp.add(textDate, 2, 0);
-			
-			
-			messageLine.getChildren().add(mgp);
-			mainWindow.getChildren().add(messageLine);
-		}
-		
+		// get messages in the inbox
+		displayMessages(mailbox.getMessages());
+
 		//add nodes to scenes
 		buttonWindow.getChildren().add(composeBtn);
 		root.getChildren().addAll(menuBar, buttonWindow, vScroll);
@@ -195,6 +144,62 @@ public class MailboxWindow extends Stage {
 		// set stage and show
 		this.setScene(new Scene(root, 1200, 800));
 		this.show();
+	}
+	
+	public void displayMessages(Message[] messages) throws MessagingException{
+		// display messages
+				for (int i = 0; i < messages.length && i < maxMessages; i++) {
+					Message message = messages[i];
+					
+					Address[] sender = message.getFrom();
+					String stringSender = sender[0].toString();
+					Text textSender = new Text();
+					textSender.setText(stringSender);
+					
+					String subject = message.getSubject();
+					String stringSubject = subject.toString();
+					Text textSubject = new Text();
+					textSubject.setText(stringSubject);
+				
+					Date date = message.getSentDate();
+					SimpleDateFormat format = new SimpleDateFormat("MMM d");
+					String formatDate = format.format(date);
+					Text textDate = new Text();
+					textDate.setText(formatDate);
+					
+					HBox messageLine = new HBox();
+					messageLine.getStyleClass().add("messageLine"); // css #messageLine class
+					messageLine.setOnMouseClicked(new EventHandler<MouseEvent>() {
+					    @Override
+					    public void handle(MouseEvent mouseEvent) {
+					        if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
+					            if(mouseEvent.getClickCount() == 2){
+					            	try {
+										new MessageWindow(message);
+									} catch (Exception e) {
+										// TODO Print a message if unable to open!
+										e.printStackTrace();
+									}
+					            }
+					        }
+					    }
+					});
+					messageLine.setId("messageLine");
+					messageLine.setPadding(new Insets(5));
+					messageLine.setPrefWidth(1150);
+					
+					GridPane mgp = new GridPane();
+					mgp.setPrefWidth(1140);
+					mgp.setHgap(50.00);
+					
+					mgp.add(textSender, 0, 0);
+					mgp.add(textSubject, 1, 0);
+					mgp.add(textDate, 2, 0);
+					
+					
+					messageLine.getChildren().add(mgp);
+					mainWindow.getChildren().add(messageLine);
+				}
 	}
 
 }
