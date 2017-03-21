@@ -1,6 +1,6 @@
 
 .root { /* styles the root node */
-	-fx-background-color:lightgray ;
+	-fx-background-color:lightgray;
 }
 
 #mainWindow {
@@ -8,7 +8,7 @@
 }
 
 #vScroll {
-	-fx-background-color: whitesmoke;
+	-fx-background-color: lightgray;
 }
 
 #seenMessageLine {
@@ -28,4 +28,38 @@
 #unseenMessageLine:hover{
 	-fx-border-color: darkgray;
 	-fx-background-color: lightgray;
+}
+
+.messageLine{
+	-fx-font-size: 14;
+	-fx-padding:8 20 8 20;
+}
+
+.tab:hover{
+	-fx-font-weight: bold;
+}
+
+.tab:selected{
+	-fx-font-weight: bold;
+}
+
+.tab{
+	-fx-font-size: 18;
+	-fx-padding:10 15 10 15;
+	-fx-background-radius: 10 10 0 0;
+}
+
+.tabPane{
+	-fx-background-color: lightgray;
+	-fx-border-style: solid;
+	-fx-border-width: 2px;
+	-fx-border-color: darkgray;
+}
+
+#composeButton{
+	-fx-background-color: SteelBlue ;
+	-fx-border-color: darkgray ;
+    -fx-border-radius: 5;
+    -fx-font-size: 14;
+    -fx-text-fill: white;
 }
