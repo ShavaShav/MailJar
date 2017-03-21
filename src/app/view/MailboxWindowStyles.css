@@ -1,4 +1,3 @@
-
 .root { /* styles the root node */
 	-fx-background-color:lightgray;
 }
@@ -57,9 +56,15 @@
 }
 
 #composeButton{
-	-fx-background-color: SteelBlue ;
+	-fx-background-color:
+        linear-gradient(#3498db 0%, #2980b9 100%);
 	-fx-border-color: darkgray ;
     -fx-border-radius: 5;
     -fx-font-size: 14;
     -fx-text-fill: white;
+}
+
+#composeButton:hover {
+	-fx-background-color:
+        linear-gradient(#3cb0fd 0%, #3498db 100%);
 }

@@ -1,15 +1,23 @@
 
 .root { /* styles the root node */
 	-fx-background-color:lightgray ;
+	-fx-font: 14 "Verdana";
 }
 
 #prompt {
-	-fx-text-fill: rgb(255, 0 0); 
+	-fx-font: 16 "Verdana";
+	-fx-fill: red; 
 }
 
 .buttonClass {
-	-fx-background-color: SteelBlue ;
-	-fx-border-color: black ;
+	-fx-background-color:
+        linear-gradient(#3498db 0%, #2980b9 100%);
+	-fx-border-color: darkgray ;
     -fx-border-radius: 5;
     -fx-text-fill: white;
+}
+
+.buttonClass:hover {
+	-fx-background-color:
+		linear-gradient(#3cb0fd 0%, #3498db 100%);
 }

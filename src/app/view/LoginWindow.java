@@ -14,6 +14,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -39,10 +41,17 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 	public LoginWindow(){
 		setTitle("Sign-in");
 		root = new AnchorPane();
-
+		
 		mainPart = new VBox();
 		// initialize variables
-		Font titleFont = new Font("Verdana", 125.0);
+		Image logo = new Image("app/view/logo.png");
+		ImageView logoView = new ImageView();
+		logoView.setImage(logo);
+		logoView.setFitWidth(100);
+		logoView.setPreserveRatio(true);
+		logoView.setSmooth(true);
+		logoView.setCache(true);
+		Font titleFont = new Font("Verdana", 90);
 		titleText = new Text("MailJar");
 		titleText.setFont(titleFont);
 		userLabel = new Label("Email: ");
@@ -77,7 +86,7 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 		// title
 		row1 = new HBox();
 		row1.setAlignment(Pos.CENTER);
-		row1.getChildren().add(titleText);
+		row1.getChildren().addAll(logoView, titleText);
 
 		// Username/password entry
 		row2 = new HBox(); 
@@ -107,8 +116,8 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 		// anchoring
 		AnchorPane.setLeftAnchor(mainPart, 0.0);
 		AnchorPane.setTopAnchor(mainPart, 0.0);
-		AnchorPane.setRightAnchor(loginBtn, 10.0);
-		AnchorPane.setBottomAnchor(loginBtn, 10.0);
+		AnchorPane.setRightAnchor(loginBtn, 20.0);
+		AnchorPane.setBottomAnchor(loginBtn, 20.0);
 		AnchorPane.setBottomAnchor(promptText, 10.0);
 		AnchorPane.setLeftAnchor(promptText, 10.0);	
 
