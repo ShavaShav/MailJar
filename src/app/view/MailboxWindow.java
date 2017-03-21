@@ -33,6 +33,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -81,7 +82,8 @@ public class MailboxWindow extends Stage {
 		buttonWindow = new HBox();
 		buttonWindow.setAlignment(Pos.BOTTOM_LEFT);
 		composeBtn = new Button ("Compose New Message");
-		composeBtn.setPrefSize(180.0, 40.0);
+		composeBtn.setId("composeButton");
+		composeBtn.setPrefSize(220.0, 40.0);
 		composeBtn.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent t) {
 				new ComposeMailWindow();
@@ -119,9 +121,10 @@ public class MailboxWindow extends Stage {
 		
 		//create tab pane
 		tabs = new TabPane();
-		tabs.setPrefWidth(1180);
+		tabs.setPrefWidth(1200);
 		tabs.setPrefHeight(580);
-		tabs.setPadding(new Insets(PADDING));
+		tabs.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
+		tabs.getStyleClass().add("tabPane");
 
 		//create individual tabs for each mailbox folder
 		for (int i=0; i<numFolders; i++)
@@ -130,8 +133,9 @@ public class MailboxWindow extends Stage {
 			tab.setText(folders[i].getName());
 			Message[] messages = mailbox.getMessages();
 			displayMessages(messages);
-			tab.setContent(mainWindow);
+			tab.setContent(vScroll);
 			tabs.getTabs().add(tab);
+			tab.getStyleClass().add("tab");
 		}
 
 		//add nodes to scenes
@@ -165,11 +169,10 @@ public class MailboxWindow extends Stage {
 		mainWindow.setId("mainWindow");
 		vScroll = new ScrollPane();
 		vScroll.setId("vScroll");
-		vScroll.setContent(mainWindow);
 		vScroll.setVbarPolicy(ScrollBarPolicy.ALWAYS);
 		
 		mainWindow.setPrefHeight(580);
-		mainWindow.setPrefWidth(1140);
+		mainWindow.setPrefWidth(1180);
 		vScroll.setPrefWidth(1180);
 		vScroll.setPrefHeight(580);
 		//vScroll.setPadding(new Insets(PADDING));
@@ -204,7 +207,6 @@ public class MailboxWindow extends Stage {
 
 			//create rows to display messages
 			HBox messageLine = new HBox();
-			messageLine.setPadding(new Insets(5));
 			messageLine.setPrefWidth(1180);
 			messageLine.getStyleClass().add("messageLine"); // css #messageLine class
 			messageLine.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -248,7 +250,7 @@ public class MailboxWindow extends Stage {
 
 			messageLine.getChildren().add(mgp);
 			mainWindow.getChildren().add(messageLine);
-
+			vScroll.setContent(mainWindow);
 		}
 	}
 
