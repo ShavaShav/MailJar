@@ -1,3 +1,4 @@
+
 .root { /* styles the root node */
 	-fx-background-color:lightgray ;
 }
@@ -10,11 +11,21 @@
 	-fx-background-color: whitesmoke;
 }
 
-#messageLine {
+#seenMessageLine {
 	-fx-border-color: lightgray;
 }
 
-#messageLine:hover{
+#seenMessageLine:hover{
+	-fx-border-color: darkgray;
+	-fx-background-color: lightgray;
+}
+
+#unseenMessageLine {
+	-fx-border-color: lightgray;
+	-fx-font-weight: bold;
+}
+
+#unseenMessageLine:hover{
 	-fx-border-color: darkgray;
 	-fx-background-color: lightgray;
 }
