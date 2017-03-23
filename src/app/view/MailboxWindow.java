@@ -34,6 +34,8 @@ import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -82,14 +84,23 @@ public class MailboxWindow extends Stage {
 		buttonWindow = new HBox();
 		buttonWindow.setAlignment(Pos.BOTTOM_LEFT);
 		composeBtn = new Button ("Compose New Message");
-		composeBtn.setId("composeButton");
+		composeBtn.getStyleClass().add("buttonClass");
 		composeBtn.setPrefSize(220.0, 40.0);
 		composeBtn.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent t) {
 				new ComposeMailWindow();
 			}
 		});
-
+		
+		// logo
+		final Image logo = new Image("app/view/logo.png");
+		final ImageView logoView = new ImageView();
+		logoView.setImage(logo);
+		logoView.setFitWidth(100);
+		logoView.setPreserveRatio(true);
+		logoView.setSmooth(true);
+		logoView.setCache(true);
+		
 		//create menu
 		final Menu fileMenu = new Menu("File");
 		MenuBar menuBar = new MenuBar();
@@ -115,9 +126,10 @@ public class MailboxWindow extends Stage {
 		buttonWindow.setPadding(new Insets(PADDING));
 
 		//anchoring
-		AnchorPane.setLeftAnchor(buttonWindow, 10.0);
-		AnchorPane.setTopAnchor(buttonWindow, 30.0);
-		AnchorPane.setRightAnchor(buttonWindow, 10.0);
+		AnchorPane.setLeftAnchor(buttonWindow, PADDING);
+		AnchorPane.setTopAnchor(buttonWindow, PADDING*3);
+		AnchorPane.setRightAnchor(logoView, PADDING);
+		AnchorPane.setTopAnchor(logoView, PADDING);
 		
 		//create tab pane
 		tabs = new TabPane();
@@ -140,7 +152,9 @@ public class MailboxWindow extends Stage {
 
 		//add nodes to scenes
 		buttonWindow.getChildren().add(composeBtn);
-		root.getChildren().addAll(menuBar, buttonWindow, tabs);
+		root.getChildren().addAll(logoView, menuBar, buttonWindow, tabs);
+		// import css
+		root.getStylesheets().add("app/view/common.css");
 		root.getStylesheets().add("app/view/MailboxWindowStyles.css");
 
 		// if this window is closed, then whole application will close
@@ -177,10 +191,10 @@ public class MailboxWindow extends Stage {
 		vScroll.setPrefHeight(580);
 		//vScroll.setPadding(new Insets(PADDING));
 		
-		AnchorPane.setTopAnchor(tabs, TOP_HEIGHT + 10.0);
-		AnchorPane.setBottomAnchor(tabs, 10.0);
-		AnchorPane.setRightAnchor(tabs, 10.0);
-		AnchorPane.setLeftAnchor(tabs, 10.0);
+		AnchorPane.setTopAnchor(tabs, TOP_HEIGHT + PADDING);
+		AnchorPane.setBottomAnchor(tabs, PADDING);
+		AnchorPane.setRightAnchor(tabs, PADDING);
+		AnchorPane.setLeftAnchor(tabs, PADDING);
 		
 		//display messages
 		for (int i = 0; i < messages.length && i < maxMessages; i++) {

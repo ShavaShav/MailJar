@@ -1,0 +1,23 @@
+:root {
+	-fx-font: 12pt "Verdana";
+}
+
+.buttonClass {
+	-fx-background-color:
+        linear-gradient(#3498db 0%, #2980b9 100%);
+	-fx-border-color: darkgray ;
+    -fx-border-radius: 5;
+    -fx-text-fill: white;
+    -fx-min-width: 125px;
+    -fx-min-height: 50px;
+}
+
+.buttonClass:hover {
+	-fx-background-color:
+		linear-gradient(#3cb0fd 0%, #3498db 100%);
+}
+
+.root { /* styles the root node */
+	-fx-background-color:lightgray ;
+	-fx-font: 14 "Verdana";
+}

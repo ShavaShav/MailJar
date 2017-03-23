@@ -123,7 +123,8 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 
 		// add nodes to root scene
 		root.getChildren().addAll(mainPart, loginBtn, promptText);
-		
+		// import css
+		root.getStylesheets().add("app/view/common.css");
 		root.getStylesheets().add("app/view/LoginWindowStyles.css");
 		this.setScene(new Scene(root, 500, 400));
 		this.setResizable(false);
