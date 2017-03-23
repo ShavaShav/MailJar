@@ -1,5 +1,6 @@
-:root {
-	-fx-font: 12pt "Verdana";
+.root { /* styles the root node */
+	-fx-background-color:lightgray ;
+	-fx-font: 14 "Verdana";
 }
 
 .buttonClass {
@@ -15,9 +16,4 @@
 .buttonClass:hover {
 	-fx-background-color:
 		linear-gradient(#3cb0fd 0%, #3498db 100%);
-}
-
-.root { /* styles the root node */
-	-fx-background-color:lightgray ;
-	-fx-font: 14 "Verdana";
 }
