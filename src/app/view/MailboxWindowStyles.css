@@ -26,17 +26,14 @@
 	-fx-border-color: lightgray; /* moved this here from #seen and #unseen */
 }
 
-.tab:hover{
-	-fx-font-weight: bold;
-}
 
 .tab:selected{
 	-fx-font-weight: bold;
 }
 
 .tab{
-	-fx-font-size: 18;
-	-fx-padding:10 15 10 15;
+	-fx-font-size: 14;
+	-fx-padding:5 10 5 10;
 	-fx-background-radius: 10 10 0 0;
 }
 
