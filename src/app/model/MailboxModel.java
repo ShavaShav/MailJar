@@ -31,6 +31,7 @@ public class MailboxModel {
 	private HashMap<String, String> hostMap;
 	private Folder emailFolder;
 	public Message [] messages;
+	private static final boolean DEBUG = true;
 	
 	// to construct the model, must successfully connect 
 	public MailboxModel(String email, String password) throws Exception {
@@ -114,44 +115,50 @@ public class MailboxModel {
 	public Store getStore(){ return store; }
 	public Session getSession(){ return emailSession; }
 	
-//	public String getStringFromMessage(Message message){
-//		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-//	}
+	public static String getContent(Message message) throws Exception{
+		try {
+			return getHTMLFromMessage(message);
+		} catch (Exception e){
+			String s = "";
+			return parseContent(message, s);			
+		}
+	}
 	
-	public static void writePart(Part p) throws Exception {
-		if (p instanceof Message)	
-		System.out.println("----------------------------");
-		System.out.println("CONTENT-TYPE: " + p.getContentType());
-	
+	// TODO this function needs work, maybe check for html first and if exists ignore the rest?
+	private static String parseContent(Part p, String content) throws Exception {
 		//check if the content is plain text
 		if (p.isMimeType("text/plain")) {
-			System.out.println("This is plain text");
-			System.out.println("---------------------------");
-			System.out.println((String) p.getContent());
-		} 
-		//check if the content has attachment
-		else if (p.isMimeType("multipart/*")) {
-			System.out.println("This is a Multipart");
-			System.out.println("---------------------------");
+			if (DEBUG){
+				System.out.println("This is plain text");
+				System.out.println("---------------------------");				
+			}
+			content += (String) p.getContent();
+		} else if (p.isMimeType("multipart/*")) {
+			// the content has attachment
+			if (DEBUG){
+				System.out.println("This is a Multipart");
+				System.out.println("---------------------------");
+			}
 			Multipart mp = (Multipart) p.getContent();
 			int count = mp.getCount();
 			for (int i = 0; i < count; i++)
-				writePart(mp.getBodyPart(i));
-		} 
-		//check if the content is a nested message
-		else if (p.isMimeType("message/rfc822")) {
-			System.out.println("This is a Nested Message");
-			System.out.println("---------------------------");
-			writePart((Part) p.getContent());
-		} 
-		//check if the content is an inline image
-		else if (p.isMimeType("image/jpeg")) {
-			System.out.println("--------> image/jpeg");
+				content += parseContent(mp.getBodyPart(i), content);
+		} else if (p.isMimeType("message/rfc822")) {
+			// content is a nested message
+			if (DEBUG){
+				System.out.println("This is a Nested Message");
+				System.out.println("---------------------------");				
+			}
+			content += parseContent((Part) p.getContent(), content);
+		} else if (p.isMimeType("image/jpeg")) {
+			// content is an inline image
+			if (DEBUG)
+				System.out.println("--------> image/jpeg");
+			
 			Object o = p.getContent();
-	
 			InputStream x = (InputStream) o;
 			// Construct the required byte array
-			System.out.println("x.length = " + x.available());
+			if (DEBUG) System.out.println("x.length = " + x.available());
 			int i = 0;
 			byte[] bArray = new byte[x.available()];
 			while ((i = (int) ((InputStream) x).available()) > 0) {
@@ -159,12 +166,11 @@ public class MailboxModel {
 				if (result == -1)
 					break;
 			}
-			FileOutputStream f2 = new FileOutputStream("/tmp/image.jpg");
+			FileOutputStream f2 = new FileOutputStream("src/tmp/image.jpg");
 			f2.write(bArray);
-		} 
-		else if (p.getContentType().contains("image/")) {
-			System.out.println("content type" + p.getContentType());
-			File f = new File("image" + new Date().getTime() + ".jpg");
+		} else if (p.getContentType().contains("image/")) {
+			if (DEBUG) System.out.println("content type" + p.getContentType());
+			File f = new File("src/tmp/image" + new Date().getTime() + ".jpg");
 			DataOutputStream output = new DataOutputStream(
 					new BufferedOutputStream(new FileOutputStream(f)));
 	        com.sun.mail.util.BASE64DecoderStream test = 
@@ -174,29 +180,35 @@ public class MailboxModel {
 	        while ((bytesRead = test.read(buffer)) != -1) {
 	        	output.write(buffer, 0, bytesRead);
 	        }
-		} 
-		else {
+		} else {
 			Object o = p.getContent();
 			if (o instanceof String) {
-				System.out.println("This is a string");
-				System.out.println("---------------------------");
-				System.out.println((String) o);
-			} 
-			else if (o instanceof InputStream) {
-				System.out.println("This is just an input stream");
-				System.out.println("---------------------------");
+				if (DEBUG){
+					System.out.println("This is a string");
+					System.out.println("---------------------------");
+				}
+				content += (String) o;
+			} else if (o instanceof InputStream) {
+				if (DEBUG){
+					System.out.println("This is just an input stream");
+					System.out.println("---------------------------");
+				}
 				InputStream is = (InputStream) o;
+				StringBuilder sb = new StringBuilder();
 				is = (InputStream) o;
 				int c;
 				while ((c = is.read()) != -1)
-					System.out.write(c);
-			} 
-			else {
-				System.out.println("This is an unknown type");
-				System.out.println("---------------------------");
-	            System.out.println(o.toString());
+					sb.append(c);
+				content += sb.toString();
+			} else {
+				if (DEBUG){
+					System.out.println("This is an unknown type");
+					System.out.println("---------------------------");
+				}
+				content += o.toString();					
 	 		}
 	  	}
+		return content;
 	}
 	
 	public static Multipart getMultipartFromMessage(Message message) throws Exception{
@@ -209,6 +221,7 @@ public class MailboxModel {
 	
 	public static String getHTMLFromMessage(Message message) throws Exception{
 		Multipart mp = getMultipartFromMessage(message);
+		String content = "";
 		for (int j = 0; j < mp.getCount(); j++) {
 			BodyPart bp = mp.getBodyPart(j);
 			if (Pattern
@@ -217,8 +230,13 @@ public class MailboxModel {
 					.matcher(bp.getContentType()).find()) {
 				// found html part
 				return (String) bp.getContent();
-			}
+			} 
 		}
-		throw new Exception ("Not an html message");
+		throw new Exception("not html");
 	}
+//	
+//	public static void main(String args[]){
+//		File f = new File("src/tmp/image.jpg");
+//		System.out.println(f.getAbsolutePath());
+//	}
 }
