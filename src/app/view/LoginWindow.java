@@ -62,7 +62,7 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 		passwordField = new PasswordField();
 		passwordField.setText("agileasFUCK");
 		passwordField.setPrefWidth(200.0);
-		promptText = new Text();
+		promptText = new Text("");
 		promptText.setWrappingWidth(390.00);
 		promptText.setId("prompt");
 		loginBtn = new Button("Sign-in");
@@ -70,8 +70,24 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 		loginBtn.getStyleClass().add("buttonClass");
 		hostBox = new ComboBox<String>();
 		hostBox.getItems().addAll("gmail.com", "hotmail.com");
-
-		// add action handlers	       
+		
+		//add action handlers
+		userField.setOnAction(this); // set to LoginWindow's action handler
+		hostBox.valueProperty().addListener(new ChangeListener<String>(){
+			@Override
+			public void changed(ObservableValue<? extends String> comboBox, String lastSelection, String currentSelection) {
+				host = currentSelection;
+			}	
+		});
+		
+		passwordField.setOnAction(this); // set to LoginWindow's action handler
+		hostBox.valueProperty().addListener(new ChangeListener<String>(){
+			@Override
+			public void changed(ObservableValue<? extends String> comboBox, String lastSelection, String currentSelection) {
+				host = currentSelection;
+			}	
+		});
+      
 		loginBtn.setOnAction(this); // set to LoginWindow's action handler
 		hostBox.valueProperty().addListener(new ChangeListener<String>(){
 			@Override
@@ -122,7 +138,7 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 		AnchorPane.setLeftAnchor(promptText, 10.0);	
 
 		// add nodes to root scene
-		root.getChildren().addAll(mainPart, loginBtn, promptText);
+		root.getChildren().addAll(mainPart, promptText, loginBtn);
 		// import css
 		root.getStylesheets().add("app/view/common.css");
 		root.getStylesheets().add("app/view/LoginWindowStyles.css");
@@ -136,6 +152,7 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 	public void handle(ActionEvent arg0) {
 		String email = userField.getText() + '@' + host;
 		String password = passwordField.getText();
+	
 		// try to login
 		try {
 			MailboxModel mailbox = new MailboxModel(email, password);
@@ -145,6 +162,7 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 		} catch (Exception e) {
 			// show user the error message so they can correct
 			promptText.setText(e.getMessage());
+			
 		}
 	}
 }
