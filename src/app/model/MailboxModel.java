@@ -67,7 +67,7 @@ public class MailboxModel {
 	// sets the model to use a particular folder
 	public void openFolder(Folder folder) throws MessagingException{
 		emailFolder = store.getFolder(folder.getFullName());
-		emailFolder.open(Folder.READ_ONLY);
+		emailFolder.open(Folder.READ_WRITE);
 		messages = emailFolder.getMessages();
 		// TODO notify view of change -> they must get messages() and update
 	}
@@ -102,11 +102,18 @@ public class MailboxModel {
 	}
 
 	// Method to send an email using the current session
-	public void sendMessage(String recipientEmail, String subject, Multipart content) throws AddressException, MessagingException{
-        Message message = new MimeMessage(emailSession); // MIME type (HTML ok)
-	    message.setFrom(new InternetAddress(emailAddress)); // from self
-	    message.setRecipients(Message.RecipientType.TO, // recipient
-	          InternetAddress.parse(recipientEmail));
+	public void sendMessage(String toList, String ccList, String bccList, String subject, Multipart content) throws AddressException, MessagingException{
+        InternetAddress[] toListIA = InternetAddress.parse(toList);
+        InternetAddress[] ccListIA = InternetAddress.parse(ccList);
+        InternetAddress[] bccListIA = InternetAddress.parse(bccList);
+
+		Message message = new MimeMessage(emailSession); // MIME type (HTML ok)
+	    
+        message.setFrom(new InternetAddress(emailAddress)); // from self
+        message.setRecipients(Message.RecipientType.TO, toListIA);
+        message.setRecipients(Message.RecipientType.CC, ccListIA);
+        message.setRecipients(Message.RecipientType.BCC, bccListIA);
+
 	    message.setSubject("Testing Subject"); // subject 
 	    message.setContent(content); // Multipart is subclass of Message, Composed messages will have to be of this type
 	    Transport.send(message); // Send message
