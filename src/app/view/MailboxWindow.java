@@ -17,6 +17,8 @@ import javax.mail.search.FlagTerm;
 
 import app.model.MailboxModel;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -31,6 +33,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
@@ -56,7 +59,6 @@ public class MailboxWindow extends Stage {
 	private HBox buttonWindow;
 	private Button composeBtn;
 	private VBox mainWindow;
-	private ScrollPane vScroll;
 	private int numFolders;
 	private Folder[] folders;
 	private TabPane tabs;
@@ -141,18 +143,20 @@ public class MailboxWindow extends Stage {
 		//create individual tabs for each mailbox folder
 		for (int i=0; i<numFolders; i++)
 		{
+			if (i == 1) continue;
 			Tab tab = new Tab();
 			tab.setText(folders[i].getName());
-			Message[] messages = mailbox.getMessages();
-			displayMessages(messages);
-			tab.setContent(vScroll);
+			System.out.println(folders[i].getFullName());
+			mailbox.openFolder(folders[i]); // load tab's folder
+			tab.setContent(displayMessages(mailbox.getMessages())); // set content to folder's messages
 			tabs.getTabs().add(tab);
 			tab.getStyleClass().add("tab");
 		}
-
+		
 		//add nodes to scenes
 		buttonWindow.getChildren().add(composeBtn);
 		root.getChildren().addAll(logoView, menuBar, buttonWindow, tabs);
+		
 		// import css
 		root.getStylesheets().add("app/view/common.css");
 		root.getStylesheets().add("app/view/MailboxWindowStyles.css");
@@ -176,12 +180,12 @@ public class MailboxWindow extends Stage {
 		this.show();
 	}
 
-	public void displayMessages(Message[] messages) throws MessagingException{
+	public ScrollPane displayMessages(Message[] messages) throws MessagingException{
 		
 		//create message window
 		mainWindow = new VBox();
 		mainWindow.setId("mainWindow");
-		vScroll = new ScrollPane();
+		ScrollPane vScroll = new ScrollPane();
 		vScroll.setId("vScroll");
 		vScroll.setVbarPolicy(ScrollBarPolicy.ALWAYS);
 		
@@ -202,9 +206,13 @@ public class MailboxWindow extends Stage {
 
 			//obtain message senders email
 			Address[] sender = message.getFrom();
-			String email = sender == null ? null : ((InternetAddress) sender[0]).getAddress();
 			Text emailText = new Text();
-			emailText.setText(email);
+			if (sender.length != 0){
+				String email = sender == null ? null : ((InternetAddress) sender[0]).getAddress();
+				emailText.setText(email);				
+			} else {
+				emailText.setText("Deleted");
+			}
 
 			//obtain email subject
 			String subject = message.getSubject();
@@ -266,6 +274,6 @@ public class MailboxWindow extends Stage {
 			mainWindow.getChildren().add(messageLine);
 			vScroll.setContent(mainWindow);
 		}
+		return vScroll;
 	}
-
 }
