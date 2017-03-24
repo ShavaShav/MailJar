@@ -44,7 +44,7 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 		
 		mainPart = new VBox();
 		// initialize variables
-		Image logo = new Image("app/view/logo.png");
+		Image logo = new Image("img/logo.png");
 		ImageView logoView = new ImageView();
 		logoView.setImage(logo);
 		logoView.setFitWidth(100);

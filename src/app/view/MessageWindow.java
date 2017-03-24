@@ -32,14 +32,13 @@ public class MessageWindow extends Stage {
 	public MessageWindow(Message message) throws Exception{
 		setTitle(message.getSubject() + " from " + message.getFrom()[0].toString());
 		this.message = message;
-		MailboxModel.writePart(message);
 		
 		root = new BorderPane();
 		browser = new WebView();
 		webEngine = browser.getEngine();
 		
 		// parse html from message and load it into engine
-		String content = MailboxModel.getHTMLFromMessage(message);
+		String content = MailboxModel.getContent(message);
 		webEngine.loadContent(content);
 		
 		// putting fields in vbox

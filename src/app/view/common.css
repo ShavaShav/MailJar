@@ -7,10 +7,10 @@
 	-fx-background-color:
         linear-gradient(#3498db 0%, #2980b9 100%);
 	-fx-border-color: darkgray ;
-    	-fx-border-radius: 5;
-    	-fx-text-fill: white;
-    	-fx-min-width: 125px;
-    	-fx-min-height: 50px;
+    -fx-border-radius: 5;
+    -fx-text-fill: white;
+    -fx-min-width: 125px;
+    -fx-min-height: 50px;
 }
 
 .buttonClass:hover {

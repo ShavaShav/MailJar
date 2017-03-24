@@ -93,7 +93,7 @@ public class MailboxWindow extends Stage {
 		});
 		
 		// logo
-		final Image logo = new Image("app/view/logo.png");
+		final Image logo = new Image("img/logo.png");
 		final ImageView logoView = new ImageView();
 		logoView.setImage(logo);
 		logoView.setFitWidth(100);
