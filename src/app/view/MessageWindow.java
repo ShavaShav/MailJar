@@ -2,6 +2,7 @@ package app.view;
 
 import javax.mail.Message;
 
+import app.Parser;
 import app.model.MailboxModel;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -38,7 +39,7 @@ public class MessageWindow extends Stage {
 		webEngine = browser.getEngine();
 		
 		// parse html from message and load it into engine
-		String content = MailboxModel.getContent(message);
+		String content = Parser.getContent(message);
 		webEngine.loadContent(content);
 		
 		// putting fields in vbox
