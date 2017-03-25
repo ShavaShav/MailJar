@@ -43,3 +43,9 @@
 	-fx-border-width: 2px;
 	-fx-border-color: darkgray;
 }
+
+#headers{
+	-fx-font-size: 15;
+	-fx-padding:8 20 8 20;
+	-fx-border-color: darkgray;
+}
