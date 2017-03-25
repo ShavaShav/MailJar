@@ -143,9 +143,11 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 			MailboxModel mailbox = new MailboxModel(email, password);
 			// if successful, create main window and close this one
 			new MailboxWindow(mailbox, smtp);
+			this.close();
 		} catch (Exception e) {
-				e.printStackTrace();
-				promptText.setText(e.getMessage());
+			// show user error message so they can correct
+			e.printStackTrace();
+			promptText.setText(e.getMessage());
 		} 
 	}
 }
