@@ -49,6 +49,7 @@ public class MailboxWindow extends Stage {
 	private MailboxModel mailbox; // model that supplies methods to get info for window
 	private Tab currentTab; // for refreshing and other utilities
 	private SMTPModel smtp;
+	private boolean currentlyInDrafts = false;
 
 	private double PADDING = 10;
 	private double TOP_HEIGHT = 180;
@@ -108,7 +109,7 @@ public class MailboxWindow extends Stage {
 		composeBtn.setPrefSize(220.0, 40.0);
 		composeBtn.setOnAction(new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent t) {
-				new ComposeMailWindow(smtp);
+				new ComposeMailWindow(smtp, mailbox);
 			}
 		});
 		Button refresh = new Button ("Refresh");
@@ -203,6 +204,11 @@ public class MailboxWindow extends Stage {
 				currentTab = newTab;
 				// set content of tab to folder messages
 				setTabContentToCurrentFolder(currentTab);
+				// if draft, set boolean so we can open different compose window
+				if (folders[folderIndex].getName().equals("Drafts"))
+					currentlyInDrafts = true;
+				else
+					currentlyInDrafts = false;
 			} catch (Exception e) {
 				System.out.println("Can't open the folder for this tab!");
 				e.printStackTrace();
@@ -312,8 +318,12 @@ public class MailboxWindow extends Stage {
 					if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
 						if(mouseEvent.getClickCount() == 2){
 							try {
-								new MessageWindow(message, smtp);
-								messageLine.setId("seenMessageLine");
+								if (currentlyInDrafts)
+									new ComposeMailWindow(smtp, mailbox, message);
+								else {
+									new MessageWindow(message, smtp, mailbox);
+									messageLine.setId("seenMessageLine");									
+								}	
 							} catch (Exception e) {
 								// TODO Print a message if unable to open!
 								e.printStackTrace();

@@ -41,6 +41,7 @@ public class MailboxModel {
 		emailAddress = email;
 		hostMap = new HashMap<String, String>();
 		hostMap.put("gmail", "imap.gmail.com");
+		hostMap.put("uwindsor", "imap.gmail.com");
 		hostMap.put("hotmail", "imap-mail.outlook.com");
 		hostMap.put("live", "imap-mail.outlook.com");
 		hostMap.put("outlook", "imap-mail.outlook.com");
@@ -63,6 +64,16 @@ public class MailboxModel {
 		//create the IMAP store object and connect with the imap server
 		store = emailSession.getStore("imaps");
 		store.connect(host, email, password);  
+	}
+	
+	public Folder getFolder(String name) throws MessagingException{
+		for (Folder f : getFolders())
+			if (f.getName().equals(name)){
+				System.out.println(f.getName());
+				return f;
+			}
+		
+		return null;
 	}
 	
 	// returns the folders for current store
@@ -126,7 +137,8 @@ public class MailboxModel {
 	
 	public Store getStore(){ return store; }
 	public Session getSession(){ return emailSession; }
-	
+	public String getEmailAdress(){ return emailAddress; }
+	public Folder getCurrentFolder() { return emailFolder; }
 	
 	// These methods returns counts for ALL folders (-duplicates)
 	public int getMessageCount(){

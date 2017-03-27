@@ -30,6 +30,7 @@ import javafx.stage.Stage;
 
 public class MessageWindow extends Stage implements EventHandler<ActionEvent> {
 	private SMTPModel model;
+	private MailboxModel mailbox;
 	private final WebView browser; // displays html
     private final WebEngine webEngine; // loads content
 	private BorderPane root;
@@ -38,10 +39,11 @@ public class MessageWindow extends Stage implements EventHandler<ActionEvent> {
 	final Label lblSubjectText;
 	private double SPACING = 10, PADDING = 10;
 	
-	public MessageWindow(Message message, SMTPModel model) throws Exception{
+	public MessageWindow(Message message, SMTPModel model, MailboxModel m_model) throws Exception{
 		setTitle(message.getSubject() + " from " + message.getFrom()[0].toString());
 		this.message = message;
 		this.model = model;
+		this.mailbox = m_model;
 		
 		root = new BorderPane();
 		browser = new WebView();
@@ -128,7 +130,7 @@ public class MessageWindow extends Stage implements EventHandler<ActionEvent> {
 				}
 			}
 	
-			new ComposeMailWindow(model, to, subject, originalText);
+			new ComposeMailWindow(model, mailbox, to, subject, originalText);
 			this.close();
 		}			
 	}

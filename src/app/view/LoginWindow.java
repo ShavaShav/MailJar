@@ -70,7 +70,7 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 		loginBtn.setPrefSize(80.0, 40.0);
 		loginBtn.getStyleClass().add("buttonClass");
 		hostBox = new ComboBox<String>();
-		hostBox.getItems().addAll("gmail.com", "hotmail.com");
+		hostBox.getItems().addAll("gmail.com", "uwindsor.ca", "hotmail.com", "live.com", "outlook.com");
 
 		// add action handlers	       
 		loginBtn.setOnAction(this); // set to LoginWindow's action handler

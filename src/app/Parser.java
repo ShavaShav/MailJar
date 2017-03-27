@@ -10,8 +10,12 @@ import java.util.regex.Pattern;
 
 import javax.mail.BodyPart;
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
+import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 public class Parser {
 	private static final boolean DEBUG = false;
@@ -134,5 +138,24 @@ public class Parser {
 			} 
 		}
 		throw new Exception("not html");
+	}
+	
+	public static Message createMessage(Session session, String from, String toList, String ccList, String bccList, String subject, String htmlContent) throws MessagingException {
+		// split by comma
+		InternetAddress[] toListIA = InternetAddress.parse(toList);
+        InternetAddress[] ccListIA = InternetAddress.parse(ccList);
+        InternetAddress[] bccListIA = InternetAddress.parse(bccList);
+        
+        // create an html message
+		Message message = new MimeMessage(session);
+		message.setContent(htmlContent, "text/html; charset=utf-8");
+	    message.setFrom(new InternetAddress(from)); // from self
+		    
+        message.setRecipients(Message.RecipientType.TO, toListIA);
+        message.setRecipients(Message.RecipientType.CC, ccListIA);
+        message.setRecipients(Message.RecipientType.BCC, bccListIA);
+	    message.setSubject(subject); // subject 
+	    
+	    return message;
 	}
 }

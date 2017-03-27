@@ -12,6 +12,8 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import app.Parser;
+
 public class SMTPModel {
 	private HashMap<String, Properties> hostMap;
 	private String emailAddress;
@@ -21,6 +23,7 @@ public class SMTPModel {
 		emailAddress = email;
 		hostMap = new HashMap<String, Properties>();
 		hostMap.put("gmail", getGoogleProperties());
+		hostMap.put("uwindsor", getGoogleProperties());
 		hostMap.put("hotmail", getOutlookProperties());
 		hostMap.put("live", getOutlookProperties());
 		hostMap.put("outlook", getOutlookProperties());
@@ -37,22 +40,12 @@ public class SMTPModel {
 		});
 	}
 	
+	public String getEmailAdress(){ return emailAddress; }
+	public Session getSession(){ return session; }
+	
 	// Method to send an email using the current session
 	public void sendHTMLMessage(String toList, String ccList, String bccList, String subject, String htmlContent) throws AddressException, MessagingException{
-		// split by comma
-		InternetAddress[] toListIA = InternetAddress.parse(toList);
-        InternetAddress[] ccListIA = InternetAddress.parse(ccList);
-        InternetAddress[] bccListIA = InternetAddress.parse(bccList);
-        
-        // create an html message
-		Message message = new MimeMessage(session);
-		message.setContent(htmlContent, "text/html; charset=utf-8");
-	    message.setFrom(new InternetAddress(emailAddress)); // from self
-		    
-        message.setRecipients(Message.RecipientType.TO, toListIA);
-        message.setRecipients(Message.RecipientType.CC, ccListIA);
-        message.setRecipients(Message.RecipientType.BCC, bccListIA);
-	    message.setSubject(subject); // subject 
+		Message message = Parser.createMessage(session, emailAddress, toList, ccList, bccList, subject, htmlContent);
 
 	    Transport.send(message); // Send message
 	}

@@ -1,8 +1,12 @@
 package app.view;
 
+import javax.mail.Flags.Flag;
+import javax.mail.Folder;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 
+import app.Parser;
 import app.model.MailboxModel;
 import app.model.SMTPModel;
 import javafx.beans.value.ChangeListener;
@@ -34,18 +38,35 @@ public class ComposeMailWindow extends Stage implements EventHandler<ActionEvent
 	private ChoiceBox boxReceiver;
 	private TextField tfReceiver;
 	private TextField tfSubject;
+	
+	// these are only set if the draft constructor is called
+	private boolean isOriginallyDraft = false;
+	private Message originalDraft;
+	private MailboxModel mailbox;
+	
 	private String to = "", cc = "", bcc = ""; // save these when they're entered
 	
 	//constructor called from MessageWindow reply button
-	public ComposeMailWindow(SMTPModel model, String replyTo, String subject, String originalMessage){
-		this(model);
+	public ComposeMailWindow(SMTPModel s_model, MailboxModel m_model, String replyTo, String subject, String preparedHTML){
+		this(s_model, m_model);
 		tfReceiver.setText(replyTo);
 		tfSubject.setText(subject);
-		editor.setHtmlText(originalMessage);
+		editor.setHtmlText(preparedHTML);
 	}
 	
-	public ComposeMailWindow(SMTPModel model){
-		this.model = model;
+	// Opening an existing draft --> will have to set mailbox window to use this constructor if in drafts folder.
+	public ComposeMailWindow(SMTPModel s_model, MailboxModel m_model, Message draft) throws MessagingException, Exception{
+		this(s_model, m_model);
+		if (!draft.isSet(Flag.DRAFT))
+			throw new Exception("Message is not a draft");
+		editor.setHtmlText(Parser.getContent(draft));	
+		originalDraft = draft;
+		isOriginallyDraft = true;
+	}
+	
+	public ComposeMailWindow(SMTPModel s_model, MailboxModel m_model){
+		this.model = s_model;
+		mailbox = m_model;
 		setTitle("Compose New Message");
 		root = new BorderPane();
 		
@@ -172,6 +193,33 @@ public class ComposeMailWindow extends Stage implements EventHandler<ActionEvent
 			} else {
 				// draft
 				System.out.println("Saving draft.");
+				try {
+					// create message and set flag to draft
+					Message draft = Parser.createMessage(model.getSession(), model.getEmailAdress(), to, cc, bcc, subject, htmlContent);
+					draft.setFlag(Flag.DRAFT, true);
+					
+					// open the drafts folder
+					Folder draftsFolder = mailbox.getFolder("Drafts");
+					if (draftsFolder == null)
+						throw new Exception("No drafts folder!");
+			
+					// must delete old draft before adding, if this is originally a draft
+					if (isOriginallyDraft){
+						originalDraft.setFlag(Flag.DELETED, true);
+						draftsFolder.expunge(); // clear folder of flagged file
+					}
+					
+					// save to drafts folder
+					draft.setFlag(Flag.SEEN, true); // we've seen it
+					Message[] drafts = {draft};
+					draftsFolder.appendMessages(drafts);
+					System.out.println("Draft saved!");
+					this.close();
+					
+				} catch (Exception e1) {
+					System.out.println("Unable to save draft:" + e1.getMessage());
+					e1.printStackTrace();
+				}
 			}
 		}			
 	}
