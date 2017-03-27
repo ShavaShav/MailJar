@@ -48,6 +48,7 @@ public class MailboxWindow extends Stage {
 	private AnchorPane root;
 	private MailboxModel mailbox; // model that supplies methods to get info for window
 	private Tab currentTab; // for refreshing and other utilities
+	private SMTPModel smtp;
 
 	private double PADDING = 10;
 	private double TOP_HEIGHT = 180;
@@ -57,6 +58,7 @@ public class MailboxWindow extends Stage {
 		root = new AnchorPane();
 	
 		this.mailbox = mailbox; // set up mailbox model
+		this.smtp = smtp;
 		
 		// generate menu buttons, logos etc by Anchoring
 		generateTopElements(smtp);
@@ -310,7 +312,7 @@ public class MailboxWindow extends Stage {
 					if(mouseEvent.getButton().equals(MouseButton.PRIMARY)){
 						if(mouseEvent.getClickCount() == 2){
 							try {
-								new MessageWindow(message);
+								new MessageWindow(message, smtp);
 								messageLine.setId("seenMessageLine");
 							} catch (Exception e) {
 								// TODO Print a message if unable to open!
