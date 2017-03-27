@@ -26,12 +26,13 @@ public class SMTPModel {
 		hostMap.put("outlook", getOutlookProperties());
 		
 		String hostKey = email.split("@")[1].split("\\.")[0];
+		String userName = email.split("@")[0];
 		
 		// Setup mail server
 		session = Session.getInstance(hostMap.get(hostKey), 
 			new javax.mail.Authenticator() {
 				protected PasswordAuthentication getPasswordAuthentication() {
-					return new PasswordAuthentication("mailjar.mgmt", "agileasFUCK");
+					return new PasswordAuthentication(userName, password);
 				}
 		});
 	}
@@ -51,7 +52,7 @@ public class SMTPModel {
         message.setRecipients(Message.RecipientType.TO, toListIA);
         message.setRecipients(Message.RecipientType.CC, ccListIA);
         message.setRecipients(Message.RecipientType.BCC, bccListIA);
-	    message.setSubject("Testing Subject"); // subject 
+	    message.setSubject(subject); // subject 
 
 	    Transport.send(message); // Send message
 	}
