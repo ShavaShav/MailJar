@@ -36,6 +36,14 @@ public class ComposeMailWindow extends Stage implements EventHandler<ActionEvent
 	private TextField tfSubject;
 	private String to = "", cc = "", bcc = ""; // save these when they're entered
 	
+	//constructor called from MessageWindow reply button
+	public ComposeMailWindow(SMTPModel model, String replyTo, String subject, String originalMessage){
+		this(model);
+		tfReceiver.setText(replyTo);
+		tfSubject.setText(subject);
+		editor.setHtmlText(originalMessage);
+	}
+	
 	public ComposeMailWindow(SMTPModel model){
 		this.model = model;
 		setTitle("Compose New Message");
