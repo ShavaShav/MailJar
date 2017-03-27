@@ -1,10 +1,15 @@
 package app.view;
 
 import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 
 import app.Parser;
 import app.model.MailboxModel;
+import app.model.SMTPModel;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -23,16 +28,20 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
-public class MessageWindow extends Stage {
+public class MessageWindow extends Stage implements EventHandler<ActionEvent> {
+	private SMTPModel model;
 	private final WebView browser; // displays html
     private final WebEngine webEngine; // loads content
 	private BorderPane root;
 	private Message message;
+	final Label lblSender;
+	final Label lblSubjectText;
 	private double SPACING = 10, PADDING = 10;
 	
-	public MessageWindow(Message message) throws Exception{
+	public MessageWindow(Message message, SMTPModel model) throws Exception{
 		setTitle(message.getSubject() + " from " + message.getFrom()[0].toString());
 		this.message = message;
+		this.model = model;
 		
 		root = new BorderPane();
 		browser = new WebView();
@@ -53,7 +62,7 @@ public class MessageWindow extends Stage {
 		final HBox senderBox = new HBox();
 		final Label lblFrom = new Label("From:");
 		lblFrom.setPrefWidth(100);
-		final Label lblSender = new Label(message.getFrom()[0].toString());
+		lblSender = new Label(message.getFrom()[0].toString());
 		senderBox.getChildren().addAll(lblFrom, lblSender);
 		senderBox.setHgrow(lblSender, Priority.ALWAYS);
 		senderBox.getStyleClass().add("messageLine");
@@ -63,7 +72,7 @@ public class MessageWindow extends Stage {
 		final HBox subjectBox = new HBox();
 		final Label lblSubject = new Label("Subject:"); 
 		lblSubject.setPrefWidth(100);
-		final Label lblSubjectText = new Label(message.getSubject());
+		lblSubjectText = new Label(message.getSubject());
 		subjectBox.getChildren().addAll(lblSubject, lblSubjectText);
 		subjectBox.setHgrow(lblSubject, Priority.ALWAYS);
 		subjectBox.getStyleClass().add("messageLine");
@@ -77,12 +86,17 @@ public class MessageWindow extends Stage {
 		browserBox.setHgrow(browser, Priority.ALWAYS); // resize width fo editor
 		root.setCenter(browserBox);
 		
-		// reply button
+		// reply and reply all buttons
 		HBox buttonBox = new HBox();
 		final Button replyButton = new Button("Reply");
 		replyButton.getStyleClass().add("buttonClass");
-		buttonBox.getChildren().addAll(replyButton);
+		replyButton.setOnAction(this);
+		final Button replyAllButton = new Button("Reply All");
+		replyAllButton.getStyleClass().add("buttonClass");
+		replyAllButton.setOnAction(this);
+		buttonBox.getChildren().addAll(replyButton, replyAllButton);
 		buttonBox.setPadding(new Insets(PADDING));
+		buttonBox.setSpacing(SPACING);
 		buttonBox.setAlignment(Pos.BOTTOM_RIGHT);
 		root.setBottom(buttonBox);
 		
@@ -92,6 +106,31 @@ public class MessageWindow extends Stage {
 		// set stage and show
 		this.setScene(new Scene(root, 800, 500));
 		this.show();
+	}
+
+	public void handle(ActionEvent e) {
+		
+		//save to, subject and originalText values to fill the new message with
+		String subject = "Re: " + lblSubjectText.getText();
+		String to = lblSender.getText();
+		String originalText = "<br><hr>" + (String) webEngine.executeScript("document.documentElement.outerHTML");
+		
+		Object o = e.getSource();
+		if (o instanceof Button){
+			Button b = (Button) o;
+			if (b.getText().equals("Reply")){
+				String toAll = lblSender.getText();
+				//reply to the first address instead of all
+				try {
+					to = message.getFrom()[0].toString();
+				} catch (MessagingException e1) {
+					e1.printStackTrace();
+				}
+			}
+	
+			new ComposeMailWindow(model, to, subject, originalText);
+			this.close();
+		}			
 	}
 
 }
