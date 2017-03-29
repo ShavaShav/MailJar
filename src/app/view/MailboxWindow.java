@@ -6,11 +6,13 @@ import java.util.Date;
 
 import javax.mail.Address;
 import javax.mail.Flags;
+import javax.mail.Flags.Flag;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 
+import app.MainApp;
 import app.model.MailboxModel;
 import app.model.SMTPModel;
 import javafx.application.Platform;
@@ -56,6 +58,7 @@ public class MailboxWindow extends Stage {
 	
 	public MailboxWindow(MailboxModel mailbox, SMTPModel smtp) throws MessagingException, IOException{
 		setTitle("Mailbox");
+		this.getIcons().addAll(MainApp.ICONS);
 		root = new AnchorPane();
 	
 		this.mailbox = mailbox; // set up mailbox model
@@ -248,6 +251,8 @@ public class MailboxWindow extends Stage {
 		subject.setText("SUBJECT");
 		Text date = new Text ();
 		date.setText("DATE");
+		Text delete = new Text ();
+		date.setText("DELETE");
 		
 		GridPane headerWindow = new GridPane();
 		headerWindow.setPrefHeight(40);
@@ -256,11 +261,13 @@ public class MailboxWindow extends Stage {
 	    ColumnConstraints column2 = new ColumnConstraints();
 	    column2.setHgrow(Priority.ALWAYS);
 	    ColumnConstraints column3 = new ColumnConstraints(150);
-	    headerWindow.getColumnConstraints().addAll(column1, column2, column3);
+	    ColumnConstraints column4 = new ColumnConstraints(50);
+	    headerWindow.getColumnConstraints().addAll(column1, column2, column3, column4);
 	
 		headerWindow.add(from, 0, 0);
 		headerWindow.add(subject, 1, 0);
 		headerWindow.add(date, 2, 0);
+		headerWindow.add(delete, 3, 0);
 		headerWindow.setId("headers");
 		
 		return headerWindow;
@@ -292,7 +299,7 @@ public class MailboxWindow extends Stage {
 				String email = sender == null ? null : ((InternetAddress) sender[0]).getAddress();
 				emailText.setText(email);				
 			} else {
-				emailText.setText("Deleted");
+				emailText.setText("Deleted"); //TODO This makes trash unable to be opened!
 			}
 
 			//obtain email subject
@@ -332,6 +339,23 @@ public class MailboxWindow extends Stage {
 					}
 				}
 			});
+			
+			//delete button
+			Button delete = new Button();
+			Image deleteGraphic = new Image(getClass().getResourceAsStream("/img/delete.png"));
+			delete.setGraphic(new ImageView(deleteGraphic));
+			delete.setOnAction(new EventHandler<ActionEvent>(){
+				public void handle(ActionEvent arg0) {
+					try {
+						message.setFlag(Flag.DELETED, true);
+						mailbox.getCurrentFolder().expunge();
+						messageLine.setStyle("-fx-background-color: lightsalmon;");
+					} catch (MessagingException e) {
+						System.out.println("Couldn't delete message");
+						e.printStackTrace();
+					} // delete message
+				}
+			});
 
 			//determine if message has been read or not
 			if (message.isSet(Flags.Flag.SEEN))
@@ -345,12 +369,14 @@ public class MailboxWindow extends Stage {
 			ColumnConstraints colEmail = new ColumnConstraints(300);
 		    ColumnConstraints colSubject = new ColumnConstraints();
 		    ColumnConstraints colDate = new ColumnConstraints(150);
+		    ColumnConstraints colDelete = new ColumnConstraints(50);
 		    colSubject.setHgrow(Priority.ALWAYS); // let subject grow
-		    mgp.getColumnConstraints().addAll(colEmail, colSubject, colDate);
+		    mgp.getColumnConstraints().addAll(colEmail, colSubject, colDate, colDelete);
 		    
 			mgp.add(emailText, 0, 0);
 			mgp.add(textSubject, 1, 0);
 			mgp.add(textDate, 2, 0);
+			mgp.add(delete, 3, 0);
 
 			HBox.setHgrow(mgp, Priority.ALWAYS);
 			messageLine.getChildren().add(mgp);

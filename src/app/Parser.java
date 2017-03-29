@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.regex.Pattern;
 
+import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -19,6 +20,10 @@ import javax.mail.internet.MimeMessage;
 
 public class Parser {
 	private static final boolean DEBUG = false;
+	private static InputStream x;
+	private static InputStream is;
+	private static FileOutputStream f2;
+	private static DataOutputStream output;
 	
 	public static String getContent(Message message) throws Exception{
 		try {
@@ -61,22 +66,21 @@ public class Parser {
 				System.out.println("--------> image/jpeg");
 			
 			Object o = p.getContent();
-			InputStream x = (InputStream) o;
+			x = (InputStream) o;
 			// Construct the required byte array
 			if (DEBUG) System.out.println("x.length = " + x.available());
-			int i = 0;
 			byte[] bArray = new byte[x.available()];
-			while ((i = (int) ((InputStream) x).available()) > 0) {
+			while (((int) ((InputStream) x).available()) > 0) {
 				int result = (int) (((InputStream) x).read(bArray));
 				if (result == -1)
 					break;
 			}
-			FileOutputStream f2 = new FileOutputStream("src/tmp/image.jpg");
+			f2 = new FileOutputStream("src/tmp/image.jpg");
 			f2.write(bArray);
 		} else if (p.getContentType().contains("image/")) {
 			if (DEBUG) System.out.println("content type" + p.getContentType());
 			File f = new File("src/tmp/image" + new Date().getTime() + ".jpg");
-			DataOutputStream output = new DataOutputStream(
+			output = new DataOutputStream(
 					new BufferedOutputStream(new FileOutputStream(f)));
 	        com.sun.mail.util.BASE64DecoderStream test = 
 	             (com.sun.mail.util.BASE64DecoderStream) p.getContent();
@@ -98,7 +102,7 @@ public class Parser {
 					System.out.println("This is just an input stream");
 					System.out.println("---------------------------");
 				}
-				InputStream is = (InputStream) o;
+				is = (InputStream) o;
 				StringBuilder sb = new StringBuilder();
 				is = (InputStream) o;
 				int c;
@@ -126,7 +130,6 @@ public class Parser {
 	
 	public static String getHTMLFromMessage(Message message) throws Exception{
 		Multipart mp = getMultipartFromMessage(message);
-		String content = "";
 		for (int j = 0; j < mp.getCount(); j++) {
 			BodyPart bp = mp.getBodyPart(j);
 			if (Pattern
@@ -138,6 +141,18 @@ public class Parser {
 			} 
 		}
 		throw new Exception("not html");
+	}
+	
+	public static String getStringFromAddresses(Address[] addresses){
+		String emails = "";
+		if (addresses != null){
+			for (int i = 0; i < addresses.length; i++){
+				if (i != 0)
+					emails += ", ";
+				emails += addresses[i].toString();		
+			}			
+		}
+		return emails;
 	}
 	
 	public static Message createMessage(Session session, String from, String toList, String ccList, String bccList, String subject, String htmlContent) throws MessagingException {

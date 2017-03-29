@@ -1,7 +1,10 @@
 package app.view;
 
+import app.MainApp;
 import app.model.MailboxModel;
 import app.model.SMTPModel;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -24,6 +27,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 	AnchorPane root;
@@ -41,6 +45,8 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 	
 	public LoginWindow(){
 		setTitle("Sign-in");
+		this.getIcons().addAll(MainApp.ICONS);
+		
 		root = new AnchorPane();
 		
 		mainPart = new VBox();
@@ -74,21 +80,7 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 		
 		//add action handlers
 		userField.setOnAction(this); // set to LoginWindow's action handler
-		hostBox.valueProperty().addListener(new ChangeListener<String>(){
-			@Override
-			public void changed(ObservableValue<? extends String> comboBox, String lastSelection, String currentSelection) {
-				host = currentSelection;
-			}	
-		});
-		
 		passwordField.setOnAction(this); // set to LoginWindow's action handler
-		hostBox.valueProperty().addListener(new ChangeListener<String>(){
-			@Override
-			public void changed(ObservableValue<? extends String> comboBox, String lastSelection, String currentSelection) {
-				host = currentSelection;
-			}	
-		});
-       
 		loginBtn.setOnAction(this); // set to LoginWindow's action handler
 		hostBox.valueProperty().addListener(new ChangeListener<String>(){
 			@Override
@@ -153,18 +145,30 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 	public void handle(ActionEvent arg0) {
 		String email = userField.getText() + '@' + host;
 		String password = passwordField.getText();
-		// try to login
-		try {
-			SMTPModel smtp = new SMTPModel(email, password);
-			MailboxModel mailbox = new MailboxModel(email, password);
-			// if successful, create main window and close this one
-			new MailboxWindow(mailbox, smtp);
-			this.close();
-		} catch (Exception e) {
-			// show user error message so they can correct
-			e.printStackTrace();
-			promptText.setText(e.getMessage());
-		} 
+		// try and sign in after 50 milliseconds: enough time on my PC to display the "signing in" prompt
+		Timeline timeline = new Timeline(new KeyFrame(
+		        Duration.millis(50),
+		        ae -> {
+		    		// try to login
+		    		try {
+		    			SMTPModel smtp = new SMTPModel(email, password);
+		    			MailboxModel mailbox = new MailboxModel(email, password);
+		    			// if successful, create main window and close this one
+		    			new MailboxWindow(mailbox, smtp);
+		    			this.close();
+		    		} catch (Exception e) {
+		    			// show user error message so they can correct
+		    			e.printStackTrace();
+		    			promptText.setText(e.getMessage());
+		    			promptText.setStyle("-fx-fill: red;");
+		    		} 
+		        }
+		));
+		timeline.play();
+		
+    	// let user know we are logging in, as there is a delay
+		promptText.setText("Signing in...");
+		promptText.setStyle("-fx-fill: blue;");
 	}
 }
 

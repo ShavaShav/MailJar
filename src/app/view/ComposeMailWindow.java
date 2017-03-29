@@ -1,11 +1,15 @@
 package app.view;
 
+import javax.mail.Address;
 import javax.mail.Flags.Flag;
 import javax.mail.Folder;
 import javax.mail.Message;
+import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 
+import app.MainApp;
 import app.Parser;
 import app.model.MailboxModel;
 import app.model.SMTPModel;
@@ -59,6 +63,13 @@ public class ComposeMailWindow extends Stage implements EventHandler<ActionEvent
 		this(s_model, m_model);
 		if (!draft.isSet(Flag.DRAFT))
 			throw new Exception("Message is not a draft");
+		
+		to = Parser.getStringFromAddresses(draft.getRecipients(RecipientType.TO));
+		cc = Parser.getStringFromAddresses(draft.getRecipients(RecipientType.CC));
+		bcc = Parser.getStringFromAddresses(draft.getRecipients(RecipientType.BCC));
+
+		tfReceiver.setText(to);
+		
 		editor.setHtmlText(Parser.getContent(draft));	
 		originalDraft = draft;
 		isOriginallyDraft = true;
@@ -68,6 +79,7 @@ public class ComposeMailWindow extends Stage implements EventHandler<ActionEvent
 		this.model = s_model;
 		mailbox = m_model;
 		setTitle("Compose New Message");
+		this.getIcons().addAll(MainApp.ICONS);
 		root = new BorderPane();
 		
 		// putting fields in grid pane
@@ -197,6 +209,11 @@ public class ComposeMailWindow extends Stage implements EventHandler<ActionEvent
 					// create message and set flag to draft
 					Message draft = Parser.createMessage(model.getSession(), model.getEmailAdress(), to, cc, bcc, subject, htmlContent);
 					draft.setFlag(Flag.DRAFT, true);
+					
+					for (Address a : draft.getAllRecipients()){
+						System.out.println(a.toString());
+						
+					}
 					
 					// open the drafts folder
 					Folder draftsFolder = mailbox.getFolder("Drafts");

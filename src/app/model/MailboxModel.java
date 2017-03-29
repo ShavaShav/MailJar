@@ -1,31 +1,12 @@
 package app.model;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.regex.Pattern;
-import javax.mail.BodyPart;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Part;
-import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
-import app.Parser;
 
 public class MailboxModel {
 	private Session emailSession;
@@ -34,7 +15,6 @@ public class MailboxModel {
 	private HashMap<String, String> hostMap;
 	private Folder emailFolder;
 	public Message [] messages;
-	private static final boolean DEBUG = true;
 	
 	// to construct the model, must successfully connect 
 	public MailboxModel(String email, String password) throws Exception {
