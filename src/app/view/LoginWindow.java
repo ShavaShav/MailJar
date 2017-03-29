@@ -71,8 +71,24 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 		loginBtn.getStyleClass().add("buttonClass");
 		hostBox = new ComboBox<String>();
 		hostBox.getItems().addAll("gmail.com", "uwindsor.ca", "hotmail.com", "live.com", "outlook.com");
-
-		// add action handlers	       
+		
+		//add action handlers
+		userField.setOnAction(this); // set to LoginWindow's action handler
+		hostBox.valueProperty().addListener(new ChangeListener<String>(){
+			@Override
+			public void changed(ObservableValue<? extends String> comboBox, String lastSelection, String currentSelection) {
+				host = currentSelection;
+			}	
+		});
+		
+		passwordField.setOnAction(this); // set to LoginWindow's action handler
+		hostBox.valueProperty().addListener(new ChangeListener<String>(){
+			@Override
+			public void changed(ObservableValue<? extends String> comboBox, String lastSelection, String currentSelection) {
+				host = currentSelection;
+			}	
+		});
+       
 		loginBtn.setOnAction(this); // set to LoginWindow's action handler
 		hostBox.valueProperty().addListener(new ChangeListener<String>(){
 			@Override
