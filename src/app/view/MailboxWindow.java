@@ -2,6 +2,7 @@ package app.view;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.mail.Address;
@@ -40,6 +41,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -52,6 +54,9 @@ public class MailboxWindow extends Stage {
 	private Tab currentTab; // for refreshing and other utilities
 	private SMTPModel smtp;
 	private boolean currentlyInDrafts = false;
+	private int unreadMessages;
+	private String greeting;
+	private Text info;
 
 	private double PADDING = 10;
 	private double TOP_HEIGHT = 180;
@@ -77,9 +82,11 @@ public class MailboxWindow extends Stage {
 		
 		root.getChildren().add(tabBox);
 		AnchorPane.setTopAnchor(tabBox, TOP_HEIGHT + PADDING);
-		AnchorPane.setBottomAnchor(tabBox, PADDING);
+		AnchorPane.setBottomAnchor(tabBox, PADDING + 60);
 		AnchorPane.setLeftAnchor(tabBox, PADDING);
 		AnchorPane.setRightAnchor(tabBox, PADDING);
+		
+		generateBottomElements();
 		
 		// import css
 		root.getStylesheets().add("app/view/common.css");
@@ -97,7 +104,7 @@ public class MailboxWindow extends Stage {
 					System.exit(0);	// exit regardless				
 				}
 			}
-		});  
+		}); 
 
 		// set stage and show
 		this.setScene(new Scene(root, 1200, 800));
@@ -128,6 +135,33 @@ public class MailboxWindow extends Stage {
 			}
 		});
 		refresh.getStyleClass().add("buttonClass");
+		
+		//info message
+		Calendar cal = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH");
+        String time = sdf.format(cal.getTime());
+        int hour = Integer.parseInt(time);
+        System.out.println(hour);
+        info = new Text();
+        
+        if (hour >= 6 && hour < 12){
+        	greeting = "Good morning ";
+        }
+        else if (hour >= 12 && hour < 18){
+        	greeting = "Good afternoon ";
+        }
+        else if (hour >=18 && hour < 24) {
+        	greeting = "Good evening ";
+        }
+        else{
+        	greeting = "Good night ";
+        }
+        
+        //Text info = new Text("Good night " + mailbox.getEmail() + ",\nYou have 4 unread messages");
+        
+        Font infoFont = new Font("Verdana", 25);
+		info.setFont(infoFont);
+		composeBtn.getStyleClass().add("infoText");
 		
 		// logo
 		final Image logo = new Image("img/logo.png");
@@ -167,9 +201,11 @@ public class MailboxWindow extends Stage {
 		AnchorPane.setTopAnchor(buttonWindow, PADDING*3);
 		AnchorPane.setRightAnchor(logoView, PADDING);
 		AnchorPane.setTopAnchor(logoView, PADDING);
+		AnchorPane.setTopAnchor(info, PADDING*5);
+		AnchorPane.setRightAnchor(info, PADDING*15);
 		
 		buttonWindow.getChildren().addAll(composeBtn, refresh);
-		root.getChildren().addAll(logoView, buttonWindow, menuBar);
+		root.getChildren().addAll(logoView, buttonWindow, menuBar, info);
 	}
 	
 	// holds tabs, and it's content areas hold headers and messages
@@ -205,6 +241,10 @@ public class MailboxWindow extends Stage {
 	    		System.out.println("Opening folder " + folderIndex + ": " + folders[folderIndex].getName());	
 				mailbox.openFolder(folders[folderIndex]);
 				currentTab = newTab;
+				//set the greeting text with the current number of unread messages
+				unreadMessages = folders[folderIndex].getUnreadMessageCount();
+				info.setText(greeting + mailbox.getEmail() + ",\nYou have " + unreadMessages + " unread messages");
+				
 				// set content of tab to folder messages
 				setTabContentToCurrentFolder(currentTab);
 				// if draft, set boolean so we can open different compose window
@@ -224,6 +264,11 @@ public class MailboxWindow extends Stage {
 			currentTab = tabs.getTabs().get(0);
 			setTabContentToCurrentFolder(currentTab);
 			tabs.getSelectionModel().selectFirst();
+			
+			//set the greeting text with the current number of unread messages
+			unreadMessages = folders[0].getUnreadMessageCount();
+			info.setText(greeting + mailbox.getEmail() + ",\nYou have " + unreadMessages + " unread messages");
+			
 		} catch (MessagingException e) {
 			// TODO Auto-generated catch block
 			System.out.println("Cant open first folder");
@@ -237,6 +282,8 @@ public class MailboxWindow extends Stage {
 		try {
 			VBox messagePane = getMessagePane(mailbox.getMessages());
 			tab.setContent(messagePane);
+			unreadMessages = mailbox.getCurrentFolder().getUnreadMessageCount();
+			info.setText(greeting + mailbox.getEmail() + ",\nYou have " + unreadMessages + " unread messages");
 		} catch (MessagingException e) {
 			// TODO Auto-generated catch block
 			System.out.println("Can't open folder");
@@ -249,10 +296,8 @@ public class MailboxWindow extends Stage {
 		from.setText("E-MAIL");
 		Text subject = new Text();
 		subject.setText("SUBJECT");
-		Text date = new Text ();
+		Text date = new Text();
 		date.setText("DATE");
-		Text delete = new Text ();
-		date.setText("DELETE");
 		
 		GridPane headerWindow = new GridPane();
 		headerWindow.setPrefHeight(40);
@@ -260,14 +305,12 @@ public class MailboxWindow extends Stage {
 		ColumnConstraints column1 = new ColumnConstraints(300);
 	    ColumnConstraints column2 = new ColumnConstraints();
 	    column2.setHgrow(Priority.ALWAYS);
-	    ColumnConstraints column3 = new ColumnConstraints(150);
-	    ColumnConstraints column4 = new ColumnConstraints(50);
-	    headerWindow.getColumnConstraints().addAll(column1, column2, column3, column4);
+	    ColumnConstraints column3 = new ColumnConstraints(215);
+	    headerWindow.getColumnConstraints().addAll(column1, column2, column3);
 	
 		headerWindow.add(from, 0, 0);
 		headerWindow.add(subject, 1, 0);
 		headerWindow.add(date, 2, 0);
-		headerWindow.add(delete, 3, 0);
 		headerWindow.setId("headers");
 		
 		return headerWindow;
@@ -329,7 +372,10 @@ public class MailboxWindow extends Stage {
 									new ComposeMailWindow(smtp, mailbox, message);
 								else {
 									new MessageWindow(message, smtp, mailbox);
-									messageLine.setId("seenMessageLine");									
+									messageLine.setId("seenMessageLine");
+									unreadMessages = mailbox.getCurrentFolder().getUnreadMessageCount();
+									info.setText(greeting + mailbox.getEmail() + ",\nYou have " + unreadMessages + " unread messages");
+									
 								}	
 							} catch (Exception e) {
 								// TODO Print a message if unable to open!
@@ -387,5 +433,27 @@ public class MailboxWindow extends Stage {
 		messagePane.getChildren().addAll(headerPane, vScroll);
 		VBox.setVgrow(vScroll, Priority.ALWAYS); // after header, fill rest of screen with messages
 		return messagePane;
+	}
+	
+	private void generateBottomElements() {
+		HBox bottomButtons = new HBox();
+		final Button previousButton = new Button("previous 10");
+		previousButton.getStyleClass().add("buttonClass");
+		final Button nextButton = new Button("next 10");
+		nextButton.getStyleClass().add("buttonClass");
+		bottomButtons.getChildren().addAll(previousButton, nextButton);
+		
+		//sizing
+		bottomButtons.setPadding(new Insets(PADDING));
+		bottomButtons.setSpacing(10);
+		
+		//anchoring
+		AnchorPane.setRightAnchor(bottomButtons, PADDING-5);
+		AnchorPane.setBottomAnchor(bottomButtons, PADDING-5);
+		
+		bottomButtons.setAlignment(Pos.BOTTOM_RIGHT);
+		root.getChildren().add(bottomButtons);
+		
+		
 	}
 }
