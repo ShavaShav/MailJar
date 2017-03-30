@@ -71,6 +71,7 @@ public class MailboxWindow extends Stage {
 	public MailboxWindow(MailboxModel mailbox, SMTPModel smtp) throws MessagingException, IOException{
 		setTitle("Mailbox");
 		this.getIcons().addAll(MainApp.ICONS);
+		this.setMinWidth(800);
 		root = new AnchorPane();
 	
 		this.mailbox = mailbox; // set up mailbox model
@@ -141,6 +142,7 @@ public class MailboxWindow extends Stage {
 							prompt.setText("");
 							setTabContentToCurrentFolder(currentTab);
 						} catch (Exception e) {
+							JOptionPane.showMessageDialog(null, "Please restart, too many refreshes: " + e.getMessage() , "Fatal Error",  JOptionPane.ERROR_MESSAGE);
 							e.printStackTrace();
 						}
 			        }
@@ -219,7 +221,7 @@ public class MailboxWindow extends Stage {
 		AnchorPane.setRightAnchor(info, PADDING*15);
 		
 		buttonWindow.getChildren().addAll(composeBtn, refresh);
-		root.getChildren().addAll(logoView, buttonWindow, menuBar, info);
+		root.getChildren().addAll(info, logoView, buttonWindow, menuBar);
 	}
 	
 	// holds tabs, and it's content areas hold headers and messages
@@ -265,6 +267,7 @@ public class MailboxWindow extends Stage {
 							
 							// set content of tab to folder messages
 							setTabContentToCurrentFolder(currentTab);
+							System.out.println(currentTab.getText());
 							prompt.setText("");
 							// if draft, set boolean so we can open different compose window
 							if (folder.getName().equals("Drafts"))
@@ -303,6 +306,7 @@ public class MailboxWindow extends Stage {
 			unreadMessages = mailbox.getCurrentFolder().getUnreadMessageCount();
 			info.setText(greeting + mailbox.getEmail().split("@")[0] + ",\nYou have " 
 					+ unreadMessages + " unread messages in " + currentTab.getText());
+			
 		} catch (MessagingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -465,7 +469,7 @@ public class MailboxWindow extends Stage {
 	
 	private void generateBottomElements() {
 		prompt = new Text();
-
+		prompt.setStyle("-fx-fill: #3498db; -fx-font-weight: bold;");
 		
 		HBox bottomButtons = new HBox();
 		final Button previousButton = new Button("Previous 10");

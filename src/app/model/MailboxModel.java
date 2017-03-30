@@ -76,6 +76,7 @@ public class MailboxModel {
 	
 	// sets the model to use a particular folder
 	public void openFolder(Folder folder) throws MessagingException{
+		currentStart =0 ; // start at the start!
 		emailFolder = store.getFolder(folder.getFullName());
 		// this is why |GMAIL| wasn't opening, it's a folder of folders!
 		// we can probably delete this because we're going to ignore recursive folders i think
@@ -107,11 +108,10 @@ public class MailboxModel {
 	
 	// Refreshs the current store and return the number of new emails
 	public int refresh() throws Exception{
+		System.out.println(emailFolder.getName());
 		int numEmails = messages.length;
 		openFolder(emailFolder); // re-open folder
-		currentStart -= 10;
-		if (currentStart < 0 ) 
-			currentStart = 0;
+		currentStart = 0;
 		return numEmails - messages.length;
 	}
 
@@ -147,7 +147,8 @@ public class MailboxModel {
 		return emailAddress;
 	}
 	
-	public ArrayList<Message> getNextTenMessages(){ // starting and ending ending of
+	// gets the next ten emails
+	public ArrayList<Message> getNextTenMessages(){
 		ArrayList<Message> toReturn = new ArrayList<Message>();
 		int currentRequest = 0;
 		for (; currentRequest < MAX_REQUESTS && currentStart < messages.length; currentStart++, currentRequest++){
@@ -156,7 +157,7 @@ public class MailboxModel {
 		return toReturn;
 	}
 	
-	public ArrayList<Message> getPrevTenMessages(){ // starting and ending ending of
+	public ArrayList<Message> getPrevTenMessages(){
 		currentStart -= (MAX_REQUESTS * 2);
 		if (currentStart < 0) currentStart = 0;
 		return getNextTenMessages();

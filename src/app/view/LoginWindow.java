@@ -18,12 +18,14 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.effect.InnerShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -59,15 +61,18 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 		logoView.setSmooth(true);
 		logoView.setCache(true);
 		Font titleFont = new Font("Verdana", 90);
+		InnerShadow in = new InnerShadow();
 		titleText = new Text("MailJar");
 		titleText.setFont(titleFont);
+		titleText.setEffect(in);
+		titleText.setFill(Color.rgb(52, 152, 219));
 		userLabel = new Label("Email: ");
 		atLabel = new Label("@");
 		passwordLabel = new Label("Password: ");
 		userField = new TextField("mailjar.mgmt");
 		userField.setPrefWidth(200.0);
 		passwordField = new PasswordField();
-		passwordField.setText("agileasFUCK");
+		passwordField.setText("RahmanIsCool280");
 		passwordField.setPrefWidth(200.0);
 		promptText = new Text();
 		promptText.setWrappingWidth(390.00);
@@ -130,6 +135,9 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 		AnchorPane.setBottomAnchor(promptText, 10.0);
 		AnchorPane.setLeftAnchor(promptText, 10.0);	
 
+		
+		
+		
 		// add nodes to root scene
 		root.getChildren().addAll(mainPart, loginBtn, promptText);
 		// import css
@@ -168,7 +176,7 @@ public class LoginWindow extends Stage implements EventHandler<ActionEvent> {
 		
     	// let user know we are logging in, as there is a delay
 		promptText.setText("Signing in...");
-		promptText.setStyle("-fx-fill: blue;");
+		promptText.setStyle("-fx-fill: #3498db; -fx-font-weight: bold;");
 	}
 }
 
