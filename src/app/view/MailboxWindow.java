@@ -12,10 +12,13 @@ import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
+import javax.swing.JOptionPane;
 
 import app.MainApp;
 import app.model.MailboxModel;
 import app.model.SMTPModel;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -45,6 +48,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Duration;
 
 public class MailboxWindow extends Stage {
 
@@ -56,7 +60,9 @@ public class MailboxWindow extends Stage {
 	private boolean currentlyInDrafts = false;
 	private int unreadMessages;
 	private String greeting;
-	private Text info;
+	private Text info, prompt;
+	
+	private static final int DELAY = 50;
 
 	private double PADDING = 10;
 	private double TOP_HEIGHT = 180;
@@ -98,7 +104,7 @@ public class MailboxWindow extends Stage {
 				try {
 					mailbox.closeModel();
 				} catch (MessagingException e) {
-					System.out.println("Unable to close store");
+					JOptionPane.showMessageDialog(null, e.getMessage(), "Unable to close to store", JOptionPane.ERROR_MESSAGE);
 				} finally {
 					Platform.exit();
 					System.exit(0);	// exit regardless				
@@ -124,15 +130,23 @@ public class MailboxWindow extends Stage {
 		});
 		Button refresh = new Button ("Refresh");
 		refresh.setOnAction(evt -> {
-			System.out.println("Refreshing current folder");
-			try {
-				int newEmails = mailbox.refresh();
-				System.out.println(newEmails + " new emails.");
-				setTabContentToCurrentFolder(currentTab);
-			} catch (Exception e) {
-				System.out.println("Failed to refresh");
-				e.printStackTrace();
-			}
+			// try to refresh after 50 milliseconds: enough time on my PC to display the prompt
+			Timeline timeline = new Timeline(new KeyFrame(
+			        Duration.millis(DELAY),
+			        ae -> {
+			    		// try to refresh
+			        	try {	
+							int newEmails = mailbox.refresh();
+							prompt.setText("");
+							setTabContentToCurrentFolder(currentTab);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+			        }
+			));
+			timeline.play();
+			
+			prompt.setText("Refreshing...");
 		});
 		refresh.getStyleClass().add("buttonClass");
 		
@@ -141,7 +155,6 @@ public class MailboxWindow extends Stage {
         SimpleDateFormat sdf = new SimpleDateFormat("HH");
         String time = sdf.format(cal.getTime());
         int hour = Integer.parseInt(time);
-        System.out.println(hour);
         info = new Text();
         
         if (hour >= 6 && hour < 12){
@@ -182,7 +195,7 @@ public class MailboxWindow extends Stage {
 				try {
 					mailbox.closeModel();
 				} catch (MessagingException e) {
-					System.out.println("Unable to close store");
+					JOptionPane.showMessageDialog(null, e.getMessage(), "Unable to close to store", JOptionPane.ERROR_MESSAGE);
 				} finally {
 					Platform.exit();
 					System.exit(0);	// exit regardless				
@@ -223,7 +236,7 @@ public class MailboxWindow extends Stage {
 				if (folders[i].getType() == Folder.HOLDS_FOLDERS)
 					continue;
 			} catch (MessagingException e) {
-				System.out.println("Unable to ignore recursive folder");
+				JOptionPane.showMessageDialog(null, e.getMessage(), "Unable to open subfolders", JOptionPane.ERROR_MESSAGE);
 			}
 			Tab tab = new Tab();
 			tab.setText(folders[i].getName());
@@ -235,27 +248,36 @@ public class MailboxWindow extends Stage {
 		
 		// when tab is clicked, open folder and set tab content to messages
 		tabs.getSelectionModel().selectedItemProperty().addListener((ov, oldTab, newTab) -> {
-	    	try {
-	    		// load tab's folder according to it's id
-	    		int folderIndex = Integer.parseInt(newTab.getId());
-	    		System.out.println("Opening folder " + folderIndex + ": " + folders[folderIndex].getName());	
-				mailbox.openFolder(folders[folderIndex]);
-				currentTab = newTab;
-				//set the greeting text with the current number of unread messages
-				unreadMessages = folders[folderIndex].getUnreadMessageCount();
-				info.setText(greeting + mailbox.getEmail() + ",\nYou have " + unreadMessages + " unread messages");
-				
-				// set content of tab to folder messages
-				setTabContentToCurrentFolder(currentTab);
-				// if draft, set boolean so we can open different compose window
-				if (folders[folderIndex].getName().equals("Drafts"))
-					currentlyInDrafts = true;
-				else
-					currentlyInDrafts = false;
-			} catch (Exception e) {
-				System.out.println("Can't open the folder for this tab!");
-				e.printStackTrace();
-			} 
+			
+			// load tab's folder according to it's id
+			int folderIndex = Integer.parseInt(newTab.getId());
+			Folder folder = folders[folderIndex];
+			
+			Timeline timeline = new Timeline(new KeyFrame(
+			        Duration.millis(DELAY),
+			        ae -> {
+			        	try {
+							mailbox.openFolder(folder);
+							currentTab = newTab;
+							//set the greeting text with the current number of unread messages
+							updateGreeting();
+							
+							// set content of tab to folder messages
+							setTabContentToCurrentFolder(currentTab);
+							prompt.setText("");
+							// if draft, set boolean so we can open different compose window
+							if (folder.getName().equals("Drafts"))
+								currentlyInDrafts = true;
+							else
+								currentlyInDrafts = false;
+					} catch (Exception e) {
+							JOptionPane.showMessageDialog(null , "Can't open the folder for this tab!", "Exception!", JOptionPane.ERROR_MESSAGE);
+							e.printStackTrace();
+					} 
+			 }));
+			timeline.play();
+			prompt.setText("Opening folder " + folder.getName());	
+
 		});
 		
 		// attempt to set open the first tab's folder
@@ -266,15 +288,18 @@ public class MailboxWindow extends Stage {
 			tabs.getSelectionModel().selectFirst();
 			
 			//set the greeting text with the current number of unread messages
-			unreadMessages = folders[0].getUnreadMessageCount();
-			info.setText(greeting + mailbox.getEmail() + ",\nYou have " + unreadMessages + " unread messages");
+			updateGreeting();
 			
 		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			System.out.println("Cant open first folder");
+			JOptionPane.showMessageDialog(null, "Can't open first folder", "Exception", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 		}
 		return tabs;
+	}
+	
+	public void updateGreeting(){
+		info.setText(greeting + mailbox.getEmail().split("@")[0] + ",\nYou have " 
+				+ unreadMessages + " unread messages in " + currentTab.getText());
 	}
 	
 	// the actual message pane part gets set to the content of a tab here
@@ -282,11 +307,9 @@ public class MailboxWindow extends Stage {
 		try {
 			VBox messagePane = getMessagePane(mailbox.getMessages());
 			tab.setContent(messagePane);
-			unreadMessages = mailbox.getCurrentFolder().getUnreadMessageCount();
-			info.setText(greeting + mailbox.getEmail() + ",\nYou have " + unreadMessages + " unread messages");
+			updateGreeting();
 		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			System.out.println("Can't open folder");
+			JOptionPane.showMessageDialog(null, "Can't open folder", "Exception", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 		}
 	}
@@ -373,8 +396,7 @@ public class MailboxWindow extends Stage {
 								else {
 									new MessageWindow(message, smtp, mailbox);
 									messageLine.setId("seenMessageLine");
-									unreadMessages = mailbox.getCurrentFolder().getUnreadMessageCount();
-									info.setText(greeting + mailbox.getEmail() + ",\nYou have " + unreadMessages + " unread messages");
+									updateGreeting();
 									
 								}	
 							} catch (Exception e) {
@@ -397,7 +419,7 @@ public class MailboxWindow extends Stage {
 						mailbox.getCurrentFolder().expunge();
 						messageLine.setStyle("-fx-background-color: lightsalmon;");
 					} catch (MessagingException e) {
-						System.out.println("Couldn't delete message");
+						JOptionPane.showMessageDialog(null, "Unable to delete message", "Exception", JOptionPane.ERROR_MESSAGE);
 						e.printStackTrace();
 					} // delete message
 				}
@@ -436,6 +458,9 @@ public class MailboxWindow extends Stage {
 	}
 	
 	private void generateBottomElements() {
+		prompt = new Text();
+
+		
 		HBox bottomButtons = new HBox();
 		final Button previousButton = new Button("previous 10");
 		previousButton.getStyleClass().add("buttonClass");
@@ -448,11 +473,13 @@ public class MailboxWindow extends Stage {
 		bottomButtons.setSpacing(10);
 		
 		//anchoring
+		AnchorPane.setLeftAnchor(prompt, PADDING-5);
+		AnchorPane.setBottomAnchor(prompt, PADDING-5);
 		AnchorPane.setRightAnchor(bottomButtons, PADDING-5);
 		AnchorPane.setBottomAnchor(bottomButtons, PADDING-5);
 		
 		bottomButtons.setAlignment(Pos.BOTTOM_RIGHT);
-		root.getChildren().add(bottomButtons);
+		root.getChildren().addAll(bottomButtons, prompt);
 		
 		
 	}

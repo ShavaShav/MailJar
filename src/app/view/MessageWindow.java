@@ -4,6 +4,7 @@ import javax.mail.Address;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
+import javax.swing.JOptionPane;
 
 import app.MainApp;
 import app.Parser;
@@ -134,7 +135,7 @@ public class MessageWindow extends Stage implements EventHandler<ActionEvent> {
 				this.close();
 			}
 		} catch (MessagingException e2) {
-			System.out.println("Problem replying");
+			JOptionPane.showMessageDialog(null, e2.getMessage(), "Fatal error: Please restart", JOptionPane.ERROR_MESSAGE);
 			e2.printStackTrace();
 		}			
 	}

@@ -8,6 +8,7 @@ import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.swing.JOptionPane;
 
 import app.MainApp;
 import app.Parser;
@@ -184,36 +185,22 @@ public class ComposeMailWindow extends Stage implements EventHandler<ActionEvent
 			Button b = (Button) o;
 			if (b.getText().equals("Send")){
 				// send
-				System.out.println("To: " + to);
-				System.out.println("Cc: " + cc);
-				System.out.println("Bcc: " + bcc);
-				System.out.println("Subject: " + subject);
-				System.out.println("HTMLContent: " + htmlContent);
-				System.out.println("Sending e-mail!");
 				try {
 					model.sendHTMLMessage(to, cc, bcc, subject, htmlContent);
 					this.close(); // close the compose window
 				} catch (AddressException e1) {
-					// TODO Show error message to window!
-					System.out.println("Invalid recipients!");
+					JOptionPane.showMessageDialog(null, "Invalid recipients: " + e1.getMessage(), "Exception", JOptionPane.ERROR_MESSAGE);
 					e1.printStackTrace();
-				} catch (MessagingException e1) {
-					// TODO Auto-generated catch block
-					System.out.println("Unable to send message!");
+				} catch (Exception e1) {
+					JOptionPane.showMessageDialog(null, "Can't open first folder: " + e1.getMessage(), "Exception", JOptionPane.ERROR_MESSAGE);
 					e1.printStackTrace();
 				}
 			} else {
 				// draft
-				System.out.println("Saving draft.");
 				try {
 					// create message and set flag to draft
 					Message draft = Parser.createMessage(model.getSession(), model.getEmailAdress(), to, cc, bcc, subject, htmlContent);
 					draft.setFlag(Flag.DRAFT, true);
-					
-					for (Address a : draft.getAllRecipients()){
-						System.out.println(a.toString());
-						
-					}
 					
 					// open the drafts folder
 					Folder draftsFolder = mailbox.getFolder("Drafts");
@@ -234,7 +221,7 @@ public class ComposeMailWindow extends Stage implements EventHandler<ActionEvent
 					this.close();
 					
 				} catch (Exception e1) {
-					System.out.println("Unable to save draft:" + e1.getMessage());
+					JOptionPane.showMessageDialog(null, "Unable to save draft: " + e1.getMessage(), "Exception", JOptionPane.ERROR_MESSAGE);
 					e1.printStackTrace();
 				}
 			}

@@ -1,5 +1,7 @@
 package app.model;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Properties;
 import javax.mail.Folder;
@@ -7,6 +9,8 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
+
+import java.util.List;
 
 public class MailboxModel {
 	private Session emailSession;
@@ -31,7 +35,6 @@ public class MailboxModel {
 		
 		String hostKey = email.split("@")[1].split("\\.")[0];
 		String host = hostMap.get(hostKey);
-		System.out.println(host);
 		
 		properties.put("mail.pop3s.host", host);
 		properties.put("mail.pop3s.port", "995");
@@ -49,7 +52,6 @@ public class MailboxModel {
 	public Folder getFolder(String name) throws MessagingException{
 		for (Folder f : getFolders())
 			if (f.getName().equals(name)){
-				System.out.println(f.getName());
 				return f;
 			}
 		
@@ -74,16 +76,15 @@ public class MailboxModel {
 		emailFolder = store.getFolder(folder.getFullName());
 		// this is why |GMAIL| wasn't opening, it's a folder of folders!
 		// we can probably delete this because we're going to ignore recursive folders i think
-		if (emailFolder.getType() == Folder.HOLDS_FOLDERS){
-			Folder[] subFolders = getSubFolders(emailFolder);
-			for (Folder f : subFolders)
-				System.out.print(f.getFullName() + " *** ");
-			System.out.println("Opening "+subFolders[0].getFullName()+"..");
-			openFolder(subFolders[0]); // TODO : testing right now with 1st sub folder
-		} else {
-			emailFolder.open(Folder.READ_WRITE);			
-		}
+		if (emailFolder.getType() != Folder.HOLDS_FOLDERS)
+			emailFolder.open(Folder.READ_WRITE);	
+		
 		messages = emailFolder.getMessages();
+		
+		// reverse the messages so newest are first
+		List<Message> reversed = Arrays.asList(messages);
+		Collections.reverse(reversed);
+		reversed.toArray(messages);
 	}
 	
 	// sets the model to use the default folder
@@ -121,48 +122,20 @@ public class MailboxModel {
 	public Folder getCurrentFolder() { return emailFolder; }
 	
 	// These methods returns counts for ALL folders (-duplicates)
-	public int getMessageCount(){
-		int count = 0;
-		try {
-			count = store.getDefaultFolder().getMessageCount();
-		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return count;
+	public int getMessageCount() throws MessagingException{
+		return store.getDefaultFolder().getMessageCount();
 	}
 	
-	public int getNewMessageCount(){
-		int count = 0;
-		try {
-			count = store.getDefaultFolder().getNewMessageCount();
-		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return count;
+	public int getNewMessageCount() throws MessagingException{
+		return store.getDefaultFolder().getNewMessageCount();
 	}
 	
-	public int getUnreadMessageCount(){
-		int count = 0;
-		try {
-			count = store.getDefaultFolder().getUnreadMessageCount();
-		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return count;
+	public int getUnreadMessageCount() throws MessagingException{
+		return store.getDefaultFolder().getUnreadMessageCount();
 	}
 	
-	public int getDeletedMessageCount(){
-		int count = 0;
-		try {
-			count = store.getDefaultFolder().getDeletedMessageCount();
-		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return count;
+	public int getDeletedMessageCount() throws MessagingException{
+		return store.getDefaultFolder().getDeletedMessageCount();
 	}
 	
 	public String getEmail(){
