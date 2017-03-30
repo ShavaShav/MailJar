@@ -164,4 +164,8 @@ public class MailboxModel {
 		}
 		return count;
 	}
+	
+	public String getEmail(){
+		return emailAddress;
+	}
 }
