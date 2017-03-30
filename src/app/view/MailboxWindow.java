@@ -130,6 +130,7 @@ public class MailboxWindow extends Stage {
 				new ComposeMailWindow(smtp, mailbox);
 			}
 		});
+		
 		Button refresh = new Button ("Refresh");
 		refresh.setOnAction(evt -> {
 			// try to refresh after 50 milliseconds: enough time on my PC to display the prompt
@@ -405,9 +406,9 @@ public class MailboxWindow extends Stage {
 									new ComposeMailWindow(smtp, mailbox, message);
 								else {
 									new MessageWindow(message, smtp, mailbox);
+									message.setFlag(Flag.SEEN, true);
 									messageLine.setId("seenMessageLine");
-									updateGreeting();
-									
+									updateGreeting();	
 								}	
 							} catch (Exception e) {
 								// TODO Print a message if unable to open!
