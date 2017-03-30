@@ -92,10 +92,7 @@ public class MessageWindow extends Stage implements EventHandler<ActionEvent> {
 		final Button replyButton = new Button("Reply");
 		replyButton.getStyleClass().add("buttonClass");
 		replyButton.setOnAction(this);
-		final Button replyAllButton = new Button("Reply All");
-		replyAllButton.getStyleClass().add("buttonClass");
-		replyAllButton.setOnAction(this);
-		buttonBox.getChildren().addAll(replyButton, replyAllButton);
+		buttonBox.getChildren().add(replyButton);
 		buttonBox.setPadding(new Insets(PADDING));
 		buttonBox.setSpacing(SPACING);
 		buttonBox.setAlignment(Pos.BOTTOM_RIGHT);
@@ -117,23 +114,9 @@ public class MessageWindow extends Stage implements EventHandler<ActionEvent> {
 			Address[] tos = message.getFrom();
 			String replyTo = (tos == null) ? null : ((InternetAddress) tos[0]).getAddress();
 			String originalText = "<br><hr>" + (String) webEngine.executeScript("document.documentElement.outerHTML");
-			String to;
-			Object o = e.getSource();
-			if (o instanceof Button){
-				Button b = (Button) o;
-				if (b.getText().equals("Reply")){
-					String toAll = lblSender.getText();
-					//reply to the first address instead of all
-					try {
-						to = message.getFrom()[0].toString();
-					} catch (MessagingException e1) {
-						e1.printStackTrace();
-					}
-				}
-		
-				new ComposeMailWindow(model, mailbox, replyTo, subject, originalText);
-				this.close();
-			}
+
+			new ComposeMailWindow(model, mailbox, replyTo, subject, originalText);
+			this.close();
 		} catch (MessagingException e2) {
 			JOptionPane.showMessageDialog(null, e2.getMessage(), "Fatal error: Please restart", JOptionPane.ERROR_MESSAGE);
 			e2.printStackTrace();

@@ -2,6 +2,7 @@ package app.view;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -298,14 +299,20 @@ public class MailboxWindow extends Stage {
 	}
 	
 	public void updateGreeting(){
-		info.setText(greeting + mailbox.getEmail().split("@")[0] + ",\nYou have " 
-				+ unreadMessages + " unread messages in " + currentTab.getText());
+		try {
+			unreadMessages = mailbox.getCurrentFolder().getUnreadMessageCount();
+			info.setText(greeting + mailbox.getEmail().split("@")[0] + ",\nYou have " 
+					+ unreadMessages + " unread messages in " + currentTab.getText());
+		} catch (MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	// the actual message pane part gets set to the content of a tab here
 	private void setTabContentToCurrentFolder(Tab tab){
 		try {
-			VBox messagePane = getMessagePane(mailbox.getMessages());
+			VBox messagePane = getMessagePane(mailbox.getNextTenMessages());
 			tab.setContent(messagePane);
 			updateGreeting();
 		} catch (MessagingException e) {
@@ -339,7 +346,7 @@ public class MailboxWindow extends Stage {
 		return headerWindow;
 	}
 
-	private VBox getMessagePane(Message[] messages) throws MessagingException{
+	private VBox getMessagePane(ArrayList<Message> messages) throws MessagingException{
 		// holds header and scrolling pane
 		VBox messagePane = new VBox();
 		
@@ -355,8 +362,7 @@ public class MailboxWindow extends Stage {
 		vScroll.setVbarPolicy(ScrollBarPolicy.ALWAYS);
 		
 		//display messages
-		for (int i = 0; i < messages.length && i < maxMessages; i++) {
-			Message message = messages[i];
+		for (Message message : messages) {
 
 			//obtain message senders email
 			Address[] sender = message.getFrom();
@@ -462,10 +468,32 @@ public class MailboxWindow extends Stage {
 
 		
 		HBox bottomButtons = new HBox();
-		final Button previousButton = new Button("previous 10");
+		final Button previousButton = new Button("Previous 10");
 		previousButton.getStyleClass().add("buttonClass");
-		final Button nextButton = new Button("next 10");
+		previousButton.setOnAction(new EventHandler<ActionEvent>(){
+			@Override
+			public void handle(ActionEvent event) {
+				try {
+					currentTab.setContent(getMessagePane(mailbox.getPrevTenMessages()));
+				} catch (MessagingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+		final Button nextButton = new Button("Next 10");
 		nextButton.getStyleClass().add("buttonClass");
+		nextButton.setOnAction(new EventHandler<ActionEvent>(){
+			@Override
+			public void handle(ActionEvent event) {
+				try {
+					currentTab.setContent(getMessagePane(mailbox.getNextTenMessages()));
+				} catch (MessagingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
 		bottomButtons.getChildren().addAll(previousButton, nextButton);
 		
 		//sizing

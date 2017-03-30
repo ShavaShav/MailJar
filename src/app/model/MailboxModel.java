@@ -1,5 +1,6 @@
 package app.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,6 +20,8 @@ public class MailboxModel {
 	private HashMap<String, String> hostMap;
 	private Folder emailFolder;
 	public Message [] messages;
+	private int currentStart = 0;
+	private static final int MAX_REQUESTS = 10; // max number of emails to be shown at a time
 	
 	// to construct the model, must successfully connect 
 	public MailboxModel(String email, String password) throws Exception {
@@ -97,16 +100,18 @@ public class MailboxModel {
 		openFolder(inbox);
 	}
 	
-	// return messages in current folder
-	public Message[] getMessages() throws MessagingException {
-		return messages;
-	}
+//	// return messages in current folder
+//	public Message[] getMessages() throws MessagingException {
+//		return messages;
+//	}
 	
 	// Refreshs the current store and return the number of new emails
 	public int refresh() throws Exception{
 		int numEmails = messages.length;
 		openFolder(emailFolder); // re-open folder
-		messages = getMessages();
+		currentStart -= 10;
+		if (currentStart < 0 ) 
+			currentStart = 0;
 		return numEmails - messages.length;
 	}
 
@@ -140,5 +145,20 @@ public class MailboxModel {
 	
 	public String getEmail(){
 		return emailAddress;
+	}
+	
+	public ArrayList<Message> getNextTenMessages(){ // starting and ending ending of
+		ArrayList<Message> toReturn = new ArrayList<Message>();
+		int currentRequest = 0;
+		for (; currentRequest < MAX_REQUESTS && currentStart < messages.length; currentStart++, currentRequest++){
+			toReturn.add(messages[currentStart]);
+		}
+		return toReturn;
+	}
+	
+	public ArrayList<Message> getPrevTenMessages(){ // starting and ending ending of
+		currentStart -= (MAX_REQUESTS * 2);
+		if (currentStart < 0) currentStart = 0;
+		return getNextTenMessages();
 	}
 }
